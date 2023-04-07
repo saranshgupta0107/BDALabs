@@ -1,0 +1,160 @@
+.tablefeed th,td{
+    font-size: 1.5rem;
+    width: 5%;
+    align-content: center;
+    border: 1px solid black;
+    background: white;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+  }
+
+
+
+
+
+
+  *{
+    font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+}
+.navbar-text{
+    text-decoration: none;
+    font-size: 2.5rem;
+    display: inline-block;
+}
+/* .navbar-brand{
+    display: inline-block;
+} */
+.new{
+    display: flex;
+    justify-content: center;
+    margin-right: 30%;
+}
+.breadcrumb-item{
+    margin-left: 10px;
+    font-size: large;
+    margin-top: 10px;
+}
+.breadcrumb-item a{
+    text-decoration: none;
+    padding-left: 10px;
+}
+.newform{
+    display: flex;
+    justify-content: center;
+    margin-top: 50px;
+    box-sizing: border-box;
+    border:2px solid #474646;
+    padding: 50px 50px;
+    margin-bottom: 100px;
+    border-radius: 15px;
+    background-color: rgba(254, 255, 255, 0.858); /* Black w/opacity/see-through */
+}
+.btn-group-vertical{
+    display: flex;
+    width: 25%;
+    margin-bottom: 300px;
+    margin-top: 300px;
+}
+#top{
+    display: flex;
+    margin-top: 100px;
+    margin-left: 100px;
+    margin-right: 100px;
+}
+#group{
+    margin-top: 80px;
+    margin-bottom: 150px;
+    background-image: url(https://source.unsplash.com/1080x640/?education,management);
+    display: flex;
+    justify-content: center;
+    width: 85%;
+    margin-left: 6%;
+    margin-right: 9%;
+}
+#choose{
+    background-color: aliceblue;
+    padding: 10px;
+    height: 25%;
+    width: 25%;
+    border-radius: 10px;
+    border: 1px blue;
+}
+#liveAlertBtn{
+    margin-bottom: 100px;
+}
+#carouselExampleIndicators{
+    display: flex;
+    justify-content: center;
+    width: 85%;
+    margin-left: 6%;
+    margin-right: 9%;
+}
+#login{
+    background-image: url(https://source.unsplash.com/1080x640/?login);
+    display: flex;
+    justify-content: center;
+}
+.card-deck{
+    display: flex;
+    justify-content: center;
+    margin-top: 10%;
+    margin-bottom: 25%;
+}
+.card{
+    margin: 1%;
+}
+
+.subject{
+    text-align: center;
+}
+
+.dropdownshow{
+    background-color:aqua;
+    height: 100px;
+    text-align: center;
+    padding-top: 30px;
+}
+
+.tableoutput{
+    padding: 30px;
+}
+
+.heading{
+    text-align: center;
+}
+
+
+.settable{
+    border: 3px solid black;
+    border-collapse: collapse;
+    margin: 25px 0;
+    font-size: 0.9em;
+    font-family: sans-serif;
+    min-width: 400px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+
+.settable thead tr {
+    background-color: #009879;
+    color: #ffffff;
+    text-align: left;
+}
+
+.settable th,
+.settable td {
+    padding: 12px 15px;
+}
+
+
+.settable tbody tr {
+    border-bottom: 1px solid #dddddd;
+}
+
+.settable tbody tr:nth-of-type(even) {
+    background-color: #f3f3f3;
+}
+
+.settable tbody tr:last-of-type {
+    border-bottom: 2px solid #009879;
+}

@@ -1,0 +1,35 @@
+<section id="users">
+
+<script>
+    fetch('http://localhost:3000/users',).then((res)=>res.json()).then((data)=>{
+    console.log(data)
+    data.forEach(element => {
+      const parent = document.getElementById('users');
+const ul = document.createElement('ul');
+const li = document.createElement('li');
+const h3 = document.createElement('h3');
+h3.textContent = element.fname;
+const p1 = document.createElement('p');
+p1.textContent =  element.lname;
+const p2 = document.createElement('p');
+p2.textContent =  + element.admin;
+const p3 = document.createElement('p');
+p3.textContent =  element.phno;
+li.appendChild(h3);
+li.appendChild(p1);
+li.appendChild(p2);
+li.appendChild(p3);
+ul.appendChild(li);
+h3.innerHTML += '</h3>'; 
+p1.innerHTML= '<div style="font-weight:700; font-size:20px">' + p1.innerHTML + '</div>'
+p2.innerHTML= '<div style="font-weight:500; font-size:20px">' + p2.innerHTML + '</div>'
+p3.innerHTML= '<div style="font-weight:500; font-size:20px">' + p3.innerHTML + '</div>'
+
+parent.appendChild(ul);
+    });
+  }).catch((e)=>{
+    console.log(e)
+    console.log("Error Occured!")
+  })
+</script>
+</section>
