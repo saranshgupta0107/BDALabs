@@ -6,7 +6,7 @@ const jwt = require('jsonwebtoken');
 const { config } = require('process');
 mongoose.Promise = global.Promise;
 mongoose.connect("mongodb+srv://admin:xhBJxsjAn8oLKR6k@main.dttg1p4.mongodb.net/BDA_Labs");
-
+var loginemail;
 const secretKey = 'secret';
 
 var signUpSchema = new mongoose.Schema({
@@ -64,6 +64,14 @@ var coursesSchema = new mongoose.Schema({
     mba_student: String,
     publications_of_lab: String
    });
+
+var publicationSchema = new mongoose.Schema({
+    name:String,
+    authors:[{type:String}],
+    pub_date:Date,
+    publisher:String,
+    location:String
+})
 
 var peopleSchema = new mongoose.Schema({
     name: String,
@@ -123,6 +131,7 @@ var tutorial = mongoose.model("Tutorials", tutorialSchema,"Tutorials");
 var workshop = mongoose.model("Workshops", workshopSchema,"Workshops");
 var participate = mongoose.model("Participate", participateSchema,"Participate");
 var takes = mongoose.model("Takes", takesSchema,"Takes");
+var publication = mongoose.model("Publications", publicationSchema,"Publications");
 
 
 var app = express();
@@ -200,9 +209,21 @@ app.post('/signup', function (req, res) {
     });
 });
 
+app.post('/publicationInput', function (req, res) {
+    var myData = new publication(req.body);
+    myData.save()
+    .then(item => {
+    res.send("Publication successful");
+    })
+    .catch(err => {
+    res.status(400).send("unable to save to database");
+    });
+});
+
 app.post('/login_admin', (req, res) => {
     SignUp.find({"email":req.body.email,"password":req.body.password,"admin":true}).then((User) => {
         console.log(User)
+        loginemail = req.body.email;
         token = createToken({User},config.secretKey);
         console.log('Token:', token);
         res.redirect('/admin');
@@ -215,9 +236,12 @@ app.post('/login_admin', (req, res) => {
 });
 
 app.post('/login_user', (req, res) => {
-    SignUp.find({email:req.body.email},{password:req.body.password}).then((User) => {
+    SignUp.find({email:req.body.email,password:req.body.password}).then((User) => {
         console.log(User)
-        res.redirect('/');
+        loginemail = req.body.email;
+        token = createToken({User},config.secretKey);
+        console.log('Token:', token);
+        res.redirect('/login_user1');
     }).catch((error)=>{
         res.json({
             error: "Account not found!"  
@@ -310,6 +334,25 @@ app.post('/tutorials', function (req, res) {
         myData.save()
         .then(item => {
         res.send("Signup successful");
+        })
+        .catch(err => {
+        res.status(400).send("unable to save to database");
+        });
+        }
+        catch (error) {
+            res.status(400).send('Error: Admin Login not detected.');
+        }
+});
+
+app.post('/publications', function (req, res) {
+    try {
+        console.log(token);
+        const decoded = verifyToken(token);
+        console.log('Decoded:', decoded);
+        var myData = new publication(req.body);
+        myData.save()
+        .then(item => {
+        res.send("Publication successful");
         })
         .catch(err => {
         res.status(400).send("unable to save to database");
@@ -427,6 +470,32 @@ app.get('/', function (req, res) {
 app.get('/login_admin', function (req, res) {
     let x = path.join(__dirname,'../');
     res.sendFile(x + '/login_admin.html');
+});
+
+app.get('/login_user1', function (req, res) {
+    try {
+        console.log(token);
+        const decoded = verifyToken(token);
+        console.log('Decoded:', decoded);
+        let x = path.join(__dirname,'../');
+        res.sendFile(x + '/user.html');
+      }
+      catch (error) {
+        res.status(400).send('Error: User Login not detected.');
+      }
+});
+
+app.get('/publicationInput', function (req, res) {
+    try {
+        console.log(token);
+        const decoded = verifyToken(token);
+        console.log('Decoded:', decoded);
+        let x = path.join(__dirname,'../');
+        res.sendFile(x + '/publication.html');
+      }
+      catch (error) {
+        res.status(400).send('Error: Admin Login not detected.');
+      }
 });
 
 app.get('/projectdelete', function (req, res) {
