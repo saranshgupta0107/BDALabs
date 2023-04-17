@@ -22,13 +22,7 @@
           <a class="nav-link" href="#about">About</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="#Tutorials">Tutorial</a>
-        </li>
-        <li class="nav-item">
           <a class="nav-link" href="/publicationInput">Publication</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#Workshop">Workshop</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="/login_admin" target="_blank">Admin Login</a>
@@ -94,14 +88,6 @@
     </section>
     <hr>
 
-
-    <section id="Workshop">
-      <h2>Workshop</h2>
-      
-      <button class="button2">Add</button>  
-      <button class="button1">Delete</button> 
-      <b><hr></b>
-    </section>
     <section id="Projects">
       <h2>Projects</h2>
       <button class="button2" onclick="window.location.href='projectinput';">Add</button>  
@@ -121,13 +107,6 @@
       <b><hr></b>
     </section>
 
-    <section id="Tutorials">
-        <h2>Tutorials</h2>
-        
-      <button class="button2" onclick="window.location.href='tutorials.html';">Add</button>  
-      <button class="button1">Delete</button> 
-        <b><hr></b>
-      </section>
       <section id="People">
         <h2>Creating And Manging Team Of BDA LAB</h2>
         
@@ -269,7 +248,7 @@ parent.appendChild(ul);
     console.log("Error Occured!")
   })
 
-  fetch('http://localhost:3000/people',).then((res)=>res.json()).then((data)=>{
+  fetch('http://localhost:3000/users',).then((res)=>res.json()).then((data)=>{
     console.log(data)
     data.forEach(element => {
       const parent = document.getElementById('People');
@@ -280,7 +259,7 @@ h3.textContent = element.course_name;
 const p1 = document.createElement('p');
 p1.textContent = "Name : " + element.name;
 const p2 = document.createElement('p');
-p2.textContent = 'Post : ' + element.post;
+p2.textContent = 'Roll : ' + element.roll;
 const p4 = document.createElement('p');
 p4.innerHTML = `<button class="button1" onclick="deletePeople('${element.name}')">Delete</button> `
 p1.innerHTML= '<div style="font-weight:700; font-size:20px; display: flex; ">' + '<span style="margin-right:10px">' + p1.innerHTML +'</span>' +  p4.innerHTML + '</div>'
@@ -294,57 +273,6 @@ p2.innerHTML= '<div style="font-weight:500; font-size:16px">' + p2.innerHTML + '
 parent.appendChild(ul);
     });
   }).catch((e)=>{
-    console.log(e)
-    console.log("Error Occured!")
-  })
-
-  fetch('http://localhost:3000/tutorials',).then((res)=>res.json()).then((data)=>{
-    console.log(data)
-    data.forEach(element => {
-      console.log(element.heading)
-      const parent = document.getElementById('Tutorials');
-const ul = document.createElement('ul');
-const li = document.createElement('li');
-const h3 = document.createElement('h3');
-h3.textContent = element.heading;
-const p1 = document.createElement('p');
-p1.textContent =  "Abstract:";
-const p2 = document.createElement('p');
-p2.textContent =  element.abstract;
-const p23 = document.createElement('p');
-p23.textContent = 'Speakers:'
-const p3 = document.createElement('p');
-p3.textContent =   element.speaker;
-li.appendChild(h3);
-li.appendChild(p1);
-li.appendChild(p2);
-li.appendChild(p23);
-li.appendChild(p3);
-ul.appendChild(li);
-p1.innerHTML= '<div style="font-weight:bold; font-size:20px">' + p1.innerHTML + '</div>'
-p23.innerHTML= '<div style="font-weight:bold; font-size:20px">' + p23.innerHTML + '</div>'
-parent.appendChild(ul);
-  })}).catch((e)=>{
-    console.log(e)
-    console.log("Error Occured!")
-  })
-  fetch('http://localhost:3000/workshop',).then((res)=>res.json()).then((data)=>{
-    console.log(data)
-    data.forEach(element => {
-      console.log(element.heading)
-      const parent = document.getElementById('Workshop');
-const ul = document.createElement('ul');
-const li = document.createElement('li');
-const h3 = document.createElement('h3');
-h3.textContent = element.heading;
-const p1 = document.createElement('p');
-p1.textContent =  element.details
-li.appendChild(h3);
-li.appendChild(p1);
-ul.appendChild(li);
-p1.innerHTML = p1.innerHTML + " For More Details Click "  + `<a href="${element.link}">Here</a>`
-parent.appendChild(ul);
-  })}).catch((e)=>{
     console.log(e)
     console.log("Error Occured!")
   })
