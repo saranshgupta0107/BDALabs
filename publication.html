@@ -1,21 +1,43 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Simple registration form</title>
+    <title>Publication form</title>
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700" rel="stylesheet">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css" integrity="sha384-5sAR7xN1Nv6T6+dT2mhtzEpVJvfS3NScPQTrOxhwjIuvcA67KV2R5Jz6kr4abQsz" crossorigin="anonymous">
-    <link rel="stylesheet" href="/public/projectstyle.css">
+    <link rel="stylesheet" href="/public/publication.css">
   </head>
-  <body>
+  <body class="container">
     <div class="main-block">
-      <h1>People associated with lab</h1>
-      <form method="POST" action="/publicationInput">
+      <h1>Publication</h1>
+      <form method="POST" action="/publications">
+        
+        <label for="course_id">Name:</label>
         <input type="text" name="name" id="name" placeholder="Name" required/>
+        
+        
+        <label for="course_id">Supervisor:</label>
+        <input type="text" name="supervisor" id="supervisor" placeholder="Supervisor" required/>
+        
+        <label for="course_id">Abstract:</label>
+        <input type="text" name="abstract" id="abstract" placeholder="Abstract" required/>
+      
+        <label for="course_id">Author1:</label>
         <input type="text" name="authors" id="authors" placeholder="Author1" required/>
+         
+        <label for="course_id">Author2:</label>
         <input type="text" name="authors" id="authors" placeholder="Author2" required/>
+        
+        
+        <label for="course_id">Author3:</label>
         <input type="text" name="authors" id="authors" placeholder="Author3" required/>
+      
+        <label for="course_id">Publication Date:</label>
         <input type="date" name="pub_date" id="pub_date" placeholder="publication date" required/>
+        
+        <label for="course_id">Publisher:</label>
         <input type="text" name="publisher" id="publisher" placeholder="publisher" required/>
+        
+        <label for="course_id">Location:</label>
         <input type="text" name="location" id="location" placeholder="location" required/>
         <div class="btn-block">
           

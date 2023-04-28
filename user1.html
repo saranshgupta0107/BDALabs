@@ -8,120 +8,17 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" />
 </head>
 <body>
+	<div class="container">
+
+		<div class="main-body" id="name">
+		  
+		  </div>
+	
+		   
   
-  <div class="container">
-    <nav>
-      <div class="side_navbar">
-        <span>Main Menu</span>
-        <a href="#" class="active">Dashboard</a>
-        <a href="#">Profile</a>
-        <a href="#">Publication</a>
-        <a href="#">Project</a>
-        <a href="#">Subject As TA</a>
-      </div>
-    </nav>
-    <div class="main-body" id="name">
-      <h2>Profile </h2>
-      <div class="promo_card">
-        <h1>Welcome User Name</h1>
-        <span>Email To be Fetched</span>
-      </div>
-      <div class="history_lists">
-        <div class="list1">
-          <div class="row">
-            <h4>Project Groups</h4>
-          </div>
-		<table>
-			<thead>
-				<tr>
-					<th>Publication</th>
-					<th>Author(s)</th>
-					<th>Publication Date</th>
-					<th>Publisher</th>
-					<th>Location</th>
-				</tr>
-			</thead>
-			<tbody>
-				<tr>
-					<td>Publication 1</td>
-					<td>Author 1, Author 2</td>
-					<td>01 Jan 2022</td>
-					<td>Publisher A</td>
-					<td>Location A</td>
-				</tr>
-				<tr>
-					<td>Publication 2</td>
-					<td>Author 3, Author 4</td>
-					<td>01 Feb 2022</td>
-					<td>Publisher B</td>
-					<td>Location B</td>
-				</tr>
-				<tr>
-					<td>Publication 3</td>
-					<td>Author 5, Author 6</td>
-					<td>01 Mar 2022</td>
-					<td>Publisher C</td>
-					<td>Location C</td>
-				</tr>
-			</tbody>
-		</table>
-        </div>
-        <div class="history_lists">
-        <div class="row">
-            <h4>Subjects AS TA</h4>
-          </div>
-        <table>
-			<thead>
-				<tr>
-					<th>Subjects</th>	
-				</tr>
-			</thead>
-            <tbody>
-				<tr>
-					<td>Subject 2</td>
-				</tr>
-				<tr>
-					<td>Subject 2</td>
-					
-				</tr>
-				<tr>
-					<td>Subject 3</td>
-				</tr>
-			</tbody>
-		</table>
-      </div>
-
-      <div class="history_lists">
-        <div class="row">
-            <h4>Publication</h4>
-          </div>
-        <table>
-			<thead>
-				<tr>
-					<th>Publication:</th>	
-				</tr>
-			</thead>
-            <tbody>
-				<tr>
-					<td>Publication 1</td>
-				</tr>
-				<tr>
-					<td>Publication 2</td>
-					
-				</tr>
-				<tr>
-					<td>Publication 3</td>
-				</tr>
-			</tbody>
-		</table>
-      </div>
-
-      </div>
-    </div>
-  </div>
 <script>
-	 fetch('http://localhost:3000/logged').then((res)=>res.json).then((data)=>{
-        fetch('http://localhost:3000/user').then((res)=>res.json()).then((data)=>{
+	 
+        fetch('http://localhost:3000/user').then((res)=>res.json()).then(async(data)=>{
     console.log(data)
    
       const nameParent = document.getElementById('name');
@@ -132,11 +29,99 @@
 const p1 = document.createElement('p');
 p1.innerHTML = `<h2>Profile </h2>
       <div class="promo_card">
-        <h1>Welcome  ${data[0].fname}  ${data[0].lname}</h1>
-        <span>${data[0].email}</span>`
-	  nameParent.appendChild(p1);
+        <h1>Welcome  ${data.fname}  ${data.lname}</h1>
+        <span>${data.email}</span>`
 // p1.textContent = "Project Name: " + element.name;
-// const p2 = document.createElement('p');
+const p2 = document.createElement('p');
+p2.innerHTML = `<h2 class="heading">Publications</h2>`
+		const pubLinker = await fetch('http://localhost:3000/userPublication').then((res)=>res.json()).then(async(data)=>{
+				return data[0] 
+			})
+			const projectLinker = await fetch('http://localhost:3000/userProject').then((res)=>res.json()).then(async(data)=>{
+				return data[0] 
+			})
+			const courseLinker = await fetch('http://localhost:3000/userCourse').then((res)=>res.json()).then(async(data)=>{
+				return data[0] 
+			})
+			const pubIDS = pubLinker.ArrayID; 
+			const projectIDS = projectLinker.ArrayID ;
+			const courseIDS = courseLinker.ArrayID ;
+			console.log("ARRAYS ARE " + pubIDS)
+	      await pubIDS.forEach(async element => {
+			const pubURL = 'http://localhost:3000/publication?id=' + element
+			const publication = await fetch(pubURL).then((res)=>res.json()).then(async(data)=>{
+				return data[0] 
+			})
+			var auth = []
+			publication.authors.forEach((element)=>{
+				auth.push( " " + element )
+			})
+		p2.innerHTML = p2.innerHTML + `<div class="card_Paper">
+			<div class="card1">
+			<label for="Publication ">Publication Name:</label>
+			<p>${publication.name}</p>
+			<label for="Supervisor">Supervisor:</label>
+			<p>${auth}</p>
+			<label for="Couse Name:">Publisher:</label>
+			<p>${publication.publisher}</p>
+			<label for="Publication Date: ">Publication Date: </label>
+			<p>${publication.pub_date}</p>
+			
+			<label for="Author">Location</label>
+			<p>${publication.location}</p>
+		</div>  
+		</div>`
+	
+				
+			});
+		const p3 = document.createElement('p');
+p3.innerHTML = `<h2 class="heading">Enrolled Projects</h2>`  
+			await projectIDS.forEach(async element => {
+			const projectURL = 'http://localhost:3000/project?id=' + element
+			const project = await fetch(projectURL).then((res)=>res.json()).then(async(data)=>{
+				return data
+			})
+			p3.innerHTML = p3.innerHTML + `<div class="card_Projects">
+			<div class="card1">
+			<label for=" Name">Project Name:</label>
+			<p>${project.name}</p>
+			<label for="Description">Project Description:</label>
+			<p>${project.description}</p>
+			<label for="Instructor">Instructor:</label>
+			<p>Ratan Tata</p>
+		</div>  `
+				
+			});
+			
+			const p4 = document.createElement('p');
+			p4.innerHTML = `<h2 class="heading">Enrolled Courses</h2>`  
+			await courseIDS.forEach(async element => {
+			const projectURL = 'http://localhost:3000/course?id=' + element
+			const course = await fetch(projectURL).then((res)=>res.json()).then(async(data)=>{
+				return data
+			})
+			var cou = []
+			course.ta.forEach((element)=>{
+				cou.push( " "+ element )
+			})
+			console.log(course)
+			p4.innerHTML = p4.innerHTML + `<div class="card_Courses">
+			<div class="card1">
+			<label for=" Course_Name">Course Name:</label>
+			<p>${course.course_name}</p>
+			<label for="Instructor">Instructor:</label>
+			<p>${course.instructor}</p>
+			<label for="TA">TAs:</label>
+			<p>${cou}</p>
+		</div>  `
+				
+			});
+			
+
+nameParent.appendChild(p1);
+nameParent.appendChild(p2);
+nameParent.appendChild(p3);
+nameParent.appendChild(p4);
 // p2.textContent = 'Description : ' + element.description;
 // const p4 = document.createElement('p');
 // p4.innerHTML = `<button class="button1" onclick="deleteProjects('${element.name}')">Delete</button> `
@@ -154,7 +139,7 @@ p1.innerHTML = `<h2>Profile </h2>
     console.log(e)
     console.log("Error Occured!")
   })
-	})
+	
 </script>
 </body>
 </html>

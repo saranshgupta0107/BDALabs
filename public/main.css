@@ -151,6 +151,6 @@ main {
      width:75%;
      padding: 20px;
      background: none;
-     box-shadow: 0 0 10px #080101;
-     box-shadow: 0 0 10px #090606;
+     /* box-shadow: 0 0 10px #080101;
+     box-shadow: 0 0 10px #090606; */
    }

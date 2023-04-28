@@ -20,40 +20,7 @@ body{
 }
 
 /* Side menubar section */
-nav{
-  background: #fff;
-}
-.side_navbar{
-  padding: 1px;
-  display: flex;
-  flex-direction: column;
-}
-.side_navbar span{
-  color: gray;
-  margin: 1rem 3rem;
-  font-size: 12px;
-}
-.side_navbar a{
-  width: 100%;
-  padding: 0.8rem 3rem;
-  font-weight: 500;
-  font-size: 15px;
-  color: rgb(100, 100, 100);
-}
-.links{
-  margin-top: 5rem;
-  display: flex;
-  flex-direction: column;
-}
-.links a{
-  font-size: 13px;
-}
-.side_navbar a:hover{
-  background: rgb(235, 235, 235);
-}
-.side_navbar .active{
-  border-left: 2px solid rgb(100, 100, 100);
-}
+
 
 /* Main Body Section */
 .main-body{
@@ -70,15 +37,7 @@ nav{
   padding: 0.5rem 1rem 1rem 3rem;
   background: rgb(37, 37, 37);
 }
-.promo_card h1, .promo_card span, button{
-  margin: 10px;
-}
-.promo_card button{
-  display: block;
-  padding: 6px 12px;
-  border-radius: 5px;
-  cursor: pointer;
-}
+
 
 .row{
   display: flex;
@@ -86,20 +45,30 @@ nav{
   align-items: center;
   margin: 1rem 0;
 }
-table{
-  background: #fff;
-  padding: 1rem;
-  text-align: left;
+
+.card_Projects,.card_Courses,.card_Paper{
+  display: inline-block;
+  width:400px;
+  /* max-width: 500px; */
+  background-color: white;
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+  transition: 0.3s;
   border-radius: 10px;
+  margin:15px;
+
 }
-table td, th{
-  padding: 0.2rem 0.8rem;
-}
-table th{
-  font-size: 15px;
-}
-table td{
-  font-size: 13px;
-  color: rgb(100, 100, 100);
+.heading{
+  position: relative;
+  right: 10px;
 }
 
+label {
+  padding-left: 2px;
+  font-weight: bold;
+  margin-bottom: 5px;
+  color: black;
+}
+.card1{
+  display: flex;
+  flex-direction: column;
+}

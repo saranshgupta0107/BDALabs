@@ -7,6 +7,7 @@ const { config } = require('process');
 mongoose.Promise = global.Promise;
 mongoose.connect("mongodb+srv://admin:xhBJxsjAn8oLKR6k@main.dttg1p4.mongodb.net/BDA_Labs");
 var loginemail = "";
+var searchemail = "";
 const secretKey = 'secret';
 
 var signUpSchema = new mongoose.Schema({
@@ -35,13 +36,14 @@ var userCourseSchema = new mongoose.Schema({
 });
 
 var userPublicationSchema = new mongoose.Schema({
-    userID: String,
-    publicationID: Array
+    ID: String,
+    ArrayID: Array
 });
 
 var projectsSchema = new mongoose.Schema({
     name: String,
     description: String,
+    authors: Array,
     instructor: String
 });
 
@@ -57,18 +59,11 @@ var coursesSchema = new mongoose.Schema({
 var publicationSchema = new mongoose.Schema({
     name:String,
     supervisor:String,
-    courseName:String,
     abstract:String,
     authors:Array,
     pub_date:Date,
     publisher:String,
     location:String
-})
-
-var peopleSchema = new mongoose.Schema({
-    name: String,
-    post: String,
-    course_name: String
 })
 
 module.exports={     
@@ -96,7 +91,6 @@ var UserPublication = mongoose.model("User_Publication_Relation", userPublicatio
 var courses = mongoose.model("Courses", coursesSchema,"Courses");
 var projects = mongoose.model("Projects", projectsSchema,"Projects");
 var publication = mongoose.model("Publications", publicationSchema,"Publications");
-var people = mongoose.model("People", peopleSchema,"People");
 
 
 var app = express();
@@ -173,7 +167,7 @@ app.post('/signup', function (req, res) {
     var flag = true;
     myData.save()
     .then(item => {
-    res.send("Signup successful");
+        res.redirect("/");
     })
     .catch(err => {
     res.status(400).send("unable to save to database");
@@ -231,7 +225,7 @@ app.post('/coursesInput', function (req, res) {
           };    
         addUserDep(UserCourse,myData._id,req.body.ta,res,options);
         myData.save().then(item => {
-        res.send("Course successful");
+            res.redirect("/admin");
         })
         .catch(err => {
             res.status(400).send("unable to save to database");
@@ -242,43 +236,7 @@ app.post('/coursesInput', function (req, res) {
         }
 });
 
-app.post('/callForTutorialInput', function (req, res) {
-    try {
-        console.log(token);
-        const decoded = verifyToken(token);
-        console.log('Decoded:', decoded);
-        var myData = new callForTutorial(req.body);
-        myData.save()
-        .then(item => {
-        res.send("Signup successful");
-        })
-        .catch(err => {
-        res.status(400).send("unable to save to database");
-        });
-        }
-        catch (error) {
-            res.status(400).send('Error: Admin Login not detected.');
-        }
-});
 
-app.post('/callForWorkshopInput', function (req, res) {
-    try {
-        console.log(token);
-        const decoded = verifyToken(token);
-        console.log('Decoded:', decoded);
-        var myData = new callForWorkshop(req.body);
-        myData.save()
-        .then(item => {
-        res.send("Signup successful");
-        })
-        .catch(err => {
-        res.status(400).send("unable to save to database");
-        });
-        }
-        catch (error) {
-            res.status(400).send('Error: Admin Login not detected.');
-        }
-});
 
 app.post('/publications', function (req, res) {
     try {
@@ -286,58 +244,15 @@ app.post('/publications', function (req, res) {
         const decoded = verifyToken(token);
         console.log('Decoded:', decoded);
         var myData = new publication(req.body);
+        const options = {
+            projection: { _id: 1}
+          };    
+        addUserDep(UserPublication,myData._id,req.body.authors,res,options);
         myData.save().then(item => {
-        res.send("Publication successful");
-        for(var i = 0;i<req.body.authors.length;i++)
-        {
-            var x = Signup.findOne({email:req.body.authors[i]});
-            var y = Publication.findOne({mydata});
-            var userpubrel = userPublicationSchema({
-                userID: x.__id,
-                PublicationID: y.__id
-            })
-        }
+            res.redirect("/admin");
         })
         .catch(err => {
-        res.status(400).send("unable to save to database");
-        });
-        }
-        catch (error) {
-            res.status(400).send('Error: Admin Login not detected.');
-        }
-});
-
-app.post('/workshops', function (req, res) {
-    try {
-        console.log(token);
-        const decoded = verifyToken(token);
-        console.log('Decoded:', decoded);
-        var myData = new workshop(req.body);
-        myData.save()
-        .then(item => {
-        res.send("Signup successful");
-        })
-        .catch(err => {
-        res.status(400).send("unable to save to database");
-        });
-        }
-        catch (error) {
-            res.status(400).send('Error: Admin Login not detected.');
-        }
-});
-
-app.post('/people', function (req, res) {
-    try {
-        console.log(token);
-        const decoded = verifyToken(token);
-        console.log('Decoded:', decoded);
-        var myData = new people(req.body);
-        myData.save()
-        .then(item => {
-        res.send("Data entered successfully");
-        })
-        .catch(err => {
-        res.status(400).send("unable to save to database");
+            res.status(400).send("unable to save to database");
         });
         }
         catch (error) {
@@ -355,8 +270,9 @@ app.post('/projects', function (req, res) {
             projection: { _id: 1}
           };    
         addUserDep(UserProject,myData._id,req.body.authors,res,options);
+        console.log(myData);
         myData.save().then(item => {
-        res.send("Publication successful");
+        res.redirect("/admin");
         })
         .catch(err => {
             res.status(400).send("unable to save to database");
@@ -474,21 +390,12 @@ app.get('/publicationInput', function (req, res) {
         console.log(token);
         const decoded = verifyToken(token);
         console.log('Decoded:', decoded);
-        var myData = new publication(req.body);
-        const options = {
-            projection: { _id: 1}
-            };    
-        addUserDep(UserPublication,myData._id,req,options)
-        myData.save().then(item => {
-        res.send("Publication successful");
-        })
-        .catch(err => {
-            res.status(400).send("unable to save to database");
-        });
-    }
-    catch (error) {
-        res.status(400).send('Error: Admin Login not detected.');
-    }
+        let x = path.join(__dirname,'../');
+        res.sendFile(x + '/publication.html');
+      }
+      catch (error) {
+        res.status(400).send('Error: User Login not detected.');
+      }
 });
 
 app.get('/projectdelete', function (req, res) {
@@ -609,9 +516,9 @@ app.get('/peopledelete', function (req, res) {
 
 app.get('/users', (req, res) => {
     try {
-        console.log(token);
-        const decoded = verifyToken(token);
-        console.log('Decoded:', decoded);
+        // console.log(token);
+        // const decoded = verifyToken(token);
+        // console.log('Decoded:', decoded);
         res.setHeader('Access-Control-Allow-Origin', '*');
         SignUp.find().then(( allUsers) => {
             console.log(allUsers)
@@ -632,7 +539,8 @@ app.get('/user', (req, res) => {
         console.log('Decoded:', decoded);
         if(loginemail !==""){
         res.setHeader('Access-Control-Allow-Origin', '*');
-        SignUp.find({}).then(( allUsers) => {
+        console.log("email is " + loginemail)
+        SignUp.findOne({email: loginemail}).then(( allUsers) => {
             console.log(allUsers)
             res.status(200).json(allUsers)
         }).catch((e)=>{
@@ -649,6 +557,30 @@ app.get('/user', (req, res) => {
         res.status(400).send('Error: Admin Login not detected.');
       }
 });
+app.get('/userMail', (req, res) => {
+    try {
+        // console.log(token);
+        // const decoded = verifyToken(token);
+        // console.log('Decoded:', decoded);
+        // if(loginemail !==""){
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        SignUp.find({email: req.query.email}).then(( user) => {
+            console.log(user)
+            res.status(200).json(user)
+        }).catch((e)=>{
+            console.log("Unable to load users!")
+            res.status(400).send(e)
+        
+    })
+//    }
+//    else{
+//     res.status(400).send("NO DATA")
+//    }
+      } 
+      catch (error) {
+        res.status(400).send('Error: Admin Login not detected.');
+      }
+});
 app.get('/courses', (req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     courses.find().then(( allCourses) => {
@@ -659,6 +591,7 @@ app.get('/courses', (req, res) => {
         res.status(400).send(e)
     })
 });
+
 app.get('/projects', (req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     projects.find().then(( allProjects) => {
@@ -669,31 +602,125 @@ app.get('/projects', (req, res) => {
         res.status(400).send(e)
     })
 });
-
-app.get('/people', (req, res) => {
+app.get('/project', (req, res) => {
+    const id = req.query.id ; 
     res.setHeader('Access-Control-Allow-Origin', '*');
-    people.find().then(( allPeoples) => {
-        console.log(allPeoples)
-        res.status(200).json(allPeoples)
+    projects.findOne({_id: id }).then(( allProjects) => {
+        console.log(allProjects)
+        res.status(200).json(allProjects)
     }).catch((e)=>{
-        console.log("Unable to load people!")
+        console.log("Unable to load projects!")
+        res.status(400).send(e)
+    })
+});
+app.get('/publication', (req, res) => {
+    const id = req.query.id ; 
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    publication.find({_id: id }).then(( allProjects) => {
+        console.log(allProjects)
+        res.status(200).json(allProjects)
+    }).catch((e)=>{
+        console.log("Unable to load projects!")
+        res.status(400).send(e)
+    })
+});
+app.get('/Course', (req, res) => {
+    const id = req.query.id ; 
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    courses.findOne({_id: id }).then(( allProjects) => {
+        console.log(allProjects)
+        res.status(200).json(allProjects)
+    }).catch((e)=>{
+        console.log("Unable to load projects!")
+        res.status(400).send(e)
+    })
+});
+app.get('/project', (req, res) => {
+    const id = req.query.id ; 
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    projects.find({_id: id }).then(( allProjects) => {
+        console.log(allProjects)
+        res.status(200).json(allProjects)
+    }).catch((e)=>{
+        console.log("Unable to load projects!")
+        res.status(400).send(e)
+    })
+});
+app.get('/userPublication', async (req, res) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    const linker = await  SignUp.findOne({email: loginemail}).then((user)=>{
+        return user 
+      })
+     
+    UserPublication.find({ID: linker._id}).then(( allPublication) => {
+        console.log("linked publication is "+ allPublication)
+        res.status(200).json(allPublication)
+    }).catch((e)=>{
+        console.log("Unable to load projects!")
+        res.status(400).send(e)
+    })
+});
+app.get('/userProject', async (req, res) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    const linker = await  SignUp.findOne({email: loginemail}).then((user)=>{
+        return user 
+      })
+     
+    UserProject.find({ID: linker._id}).then(( allPublication) => {
+        console.log("linked publication is "+ allPublication)
+        res.status(200).json(allPublication)
+    }).catch((e)=>{
+        console.log("Unable to load projects!")
+        res.status(400).send(e)
+    })
+});
+app.get('/userCourse', async (req, res) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    const linker = await  SignUp.findOne({email: loginemail}).then((user)=>{
+        return user 
+      })
+     
+    UserCourse.find({ID: linker._id}).then(( allPublication) => {
+        console.log("linked publication is "+ allPublication)
+        res.status(200).json(allPublication)
+    }).catch((e)=>{
+        console.log("Unable to load projects!")
         res.status(400).send(e)
     })
 });
 
-app.get('/logged',(req,res) =>{
+app.get('/people', (req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
-    if(loginemail !== "" ){
- const logJSON = {
-    loginemail 
- }
- res.status(200).json(logJSON);
-}
-else{
-    res.status(400).send("NO DATA");
-}
-}
-)
+    var arr = []
+    SignUp.find({}).then(( allPeoples) => {
+        allPeoples.forEach((Element)=>{
+            if(Element.roll === "PHD" || Element.roll === "M. Tech."){
+                arr.push(Element)
+            }
+        })
+        res.status(200).json(arr)
+
+    }).catch((e)=>{
+        console.log(e)
+        res.status(400).send(e)
+    })
+});
+
+
+
+// app.get('/logged',(req,res) =>{
+//     res.setHeader('Access-Control-Allow-Origin', '*');
+//     if(loginemail !== "" ){
+//  const logJSON = {
+//     loginemail 
+//  }
+//  res.status(200).json(logJSON);
+// }
+// else{
+//     res.status(400).send("NO DATA");
+// }
+// }
+// )
 app.delete('/projects/delete', (req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     DelOne(projects,res,{name:req.body.name},token,UserProject);
@@ -706,7 +733,8 @@ app.delete('/courses/delete', (req, res) => {
 
 app.delete('/publication/delete', (req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
-    DelOne(publication,res,{name: req.body.name},token,UserPublication);
+    console.log("id is " + req.body.id)
+    DelOne(publication,res,{_id: req.body.id},token,UserPublication);
 });
 
 app.listen(port, () => console.log(`This app is listening on port ${port}`));

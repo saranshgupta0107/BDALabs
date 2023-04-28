@@ -24,18 +24,6 @@
         <li class="nav-item">
           <a class="nav-link" href="/publicationInput">Publication</a>
         </li>
-        <li class="nav-item">
-          <a class="nav-link" href="/login_admin" target="_blank">Admin Login</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="/login_user" target="_blank">User Login</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="/signup" target="_blank">Sign Up</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="/projectInput" target="_blank">Project Form</a>
-        </li>
       </ul>
     </div>
   </nav>
@@ -91,27 +79,26 @@
     <section id="Projects">
       <h2>Projects</h2>
       <button class="button2" onclick="window.location.href='projectinput';">Add</button>  
-      <button class="button1" onclick="window.location.href='projectdelete';">Delete</button>  
       <b><hr></b>
     </section>
 
-
+    <section id="Publication">
+      <h2>Publications</h2>
+      
+      <b><hr></b>
+    </section>
 
 
     <section id="Courses">
       <h2 id="Course">Courses</h2>
       
       <button class="button2" onclick="window.location.href='courseinput';">Add</button>  
-      <button class="button1" onclick="window.location.href='coursedelete';">Delete</button> 
      
       <b><hr></b>
     </section>
 
       <section id="People">
-        <h2>Creating And Manging Team Of BDA LAB</h2>
-        
-      <button class="button2" onclick="window.location.href='peopleinput';">Add</button>  
-      <button class="button1" onclick="window.location.href='peopledelete';">Delete</button> 
+        <h2>Team Of BDA LAB</h2>
         <b><hr></b>
       </section>
     
@@ -135,6 +122,25 @@
   },
   body: JSON.stringify({
     name
+  })
+})
+.then(response => {
+  console.log('Deleted successfully');
+})
+.catch(error => {
+  console.error('Error while deleting: ', error);
+});
+  }
+
+  function deletePublications(id){
+    window.location.href = window.location.href ;
+    fetch('/publication/delete', {
+  method: 'DELETE',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    id
   })
 })
 .then(response => {
@@ -197,7 +203,12 @@ h3.textContent = element.course_name;
 const p1 = document.createElement('p');
 p1.textContent = "Instructor: " + element.instructor;
 const p2 = document.createElement('p');
-p2.textContent = 'TAs : ' + element.mtech_ta;
+var taList = "";
+element.ta.forEach((element)=>{
+   taList = taList + element + ", ";
+})
+console.log(taList.toString());
+p2.textContent = 'TAs : ' + taList;
 const p3 = document.createElement('p');
 const p4 = document.createElement('p');
 p4.innerHTML = `<button class="button1" onclick="deleteCourses('${element.course_name}')">Delete</button> `
@@ -209,6 +220,46 @@ li.appendChild(p3);
 ul.appendChild(li);
 h3.innerHTML += '</h3>'; 
 p1.innerHTML= '<div style="font-weight:700; font-size:20px; display: flex; ">' + '<span style="margin-right:10px">' + p1.innerHTML +'</span>' +  p4.innerHTML + '</div>'
+p2.innerHTML= '<div style="font-weight:500; font-size:20px">' + p2.innerHTML + '</div>'
+p3.innerHTML= '<div style="font-weight:500; font-size:20px">' + p3.innerHTML + '</div>'
+
+parent.appendChild(ul);
+    });
+  }).catch((e)=>{
+    console.log(e)
+    console.log("Error Occured!")
+  })
+  fetch('http://localhost:3000/publications',).then((res)=>res.json()).then((data)=>{
+    console.log(data)
+    data.forEach(element => {
+      console.log(element)
+      const parent = document.getElementById('Publication');
+const ul = document.createElement('ul');
+const li = document.createElement('li');
+const h3 = document.createElement('h3');
+h3.textContent = element.name;
+const p1 = document.createElement('p');
+p1.textContent = "supervisor: " + element.supervisor;
+const p2 = document.createElement('p');
+p2.textContent = 'Abstract : ' + element.abstract;
+const p3 = document.createElement('p');
+p3.textContent = 'Publication Date:  ' + element.pub_date;
+const p4 = document.createElement('p');
+p4.textContent = 'Publisher:  ' + element.publisher;
+const p5 = document.createElement('p');
+p4.textContent = 'Location:  ' + element.location;
+const p6 = document.createElement('p');
+p6.innerHTML = `<button class="button1" onclick="deletePublications('${element._id}')">Delete</button> `
+li.appendChild(h3);
+li.appendChild(p1);
+li.appendChild(p2);
+li.appendChild(p3);
+li.appendChild(p4);
+li.appendChild(p5);
+li.appendChild(p6);
+ul.appendChild(li);
+h3.innerHTML += '</h3>'; 
+p1.innerHTML= '<div style="font-weight:700; font-size:20px">' + p1.innerHTML + '</div>'
 p2.innerHTML= '<div style="font-weight:500; font-size:20px">' + p2.innerHTML + '</div>'
 p3.innerHTML= '<div style="font-weight:500; font-size:20px">' + p3.innerHTML + '</div>'
 
@@ -247,34 +298,33 @@ parent.appendChild(ul);
     console.log(e)
     console.log("Error Occured!")
   })
-
-  fetch('http://localhost:3000/users',).then((res)=>res.json()).then((data)=>{
+  fetch('http://localhost:3000/people',).then((res)=>res.json()).then((data)=>{
     console.log(data)
     data.forEach(element => {
       const parent = document.getElementById('People');
 const ul = document.createElement('ul');
 const li = document.createElement('li');
 const h3 = document.createElement('h3');
-h3.textContent = element.course_name;
+h3.textContent = "Name: " + element.fname + " " + element.lname;
 const p1 = document.createElement('p');
-p1.textContent = "Name : " + element.name;
+p1.textContent = "Email: " + element.email;
 const p2 = document.createElement('p');
-p2.textContent = 'Roll : ' + element.roll;
-const p4 = document.createElement('p');
-p4.innerHTML = `<button class="button1" onclick="deletePeople('${element.name}')">Delete</button> `
-p1.innerHTML= '<div style="font-weight:700; font-size:20px; display: flex; ">' + '<span style="margin-right:10px">' + p1.innerHTML +'</span>' +  p4.innerHTML + '</div>'
-// const p3 = document.createElement('p');
-// p3.textContent = 'Number of Students:  ' + element.number_of_students;
+p2.textContent = 'Post : ' + element.roll;
 li.appendChild(h3);
 li.appendChild(p1);
 li.appendChild(p2);
-ul.appendChild(li);
-p2.innerHTML= '<div style="font-weight:500; font-size:16px">' + p2.innerHTML + '</div>'
+ul.appendChild(li)
+const p4 = document.createElement('p');
+h3.innerHTML += '</h3>'; 
+p1.innerHTML= '<div style="font-weight:700; font-size:20px">' + p1.innerHTML + '</div>'
+p2.innerHTML= '<div style="font-weight:400; font-size:20px">' + p2.innerHTML + '</div>'
+p1.innerHTML= '<div style="font-weight:700; font-size:20px; display: flex; ">' + '<span style="margin-right:10px">' + p1.innerHTML +'</span>' +  p4.innerHTML + '</div>'
 parent.appendChild(ul);
     });
   }).catch((e)=>{
     console.log(e)
     console.log("Error Occured!")
   })
+ 
 </script>
 </html>
