@@ -7,7 +7,7 @@ const { config } = require('process');
 mongoose.Promise = global.Promise;
 mongoose.connect("mongodb+srv://admin:xhBJxsjAn8oLKR6k@main.dttg1p4.mongodb.net/BDA_Labs");
 var loginemail = "";
-var searchemail = "";
+var searchemail = "IIT2021153@iiita.ac.in";
 const secretKey = 'secret';
 
 var signUpSchema = new mongoose.Schema({
@@ -213,7 +213,19 @@ app.post('/login_user', (req, res) => {
         }).status(400);
     })
 });
-
+// app.post('/search_user', (req, res) => {
+//     SignUp.find({email:req.body.email,password:req.body.password}).then((User) => {
+//         console.log(User)
+//         loginemail = req.body.email;
+//         token = createToken({User},config.secretKey);
+//         console.log('Token:', token);
+//         res.redirect('/search_user1');
+//     }).catch((error)=>{
+//         res.json({
+//             error: "Account not found!"  
+//         }).status(400);
+//     })
+// });
 app.post('/coursesInput', function (req, res) {
     try {
         console.log(token);
@@ -541,6 +553,31 @@ app.get('/user', (req, res) => {
         res.setHeader('Access-Control-Allow-Origin', '*');
         console.log("email is " + loginemail)
         SignUp.findOne({email: loginemail}).then(( allUsers) => {
+            console.log(allUsers)
+            res.status(200).json(allUsers)
+        }).catch((e)=>{
+            console.log("Unable to load users!")
+            res.status(400).send(e)
+        
+    })
+   }
+   else{
+    res.status(400).send("NO DATA")
+   }
+      } 
+      catch (error) {
+        res.status(400).send('Error: Admin Login not detected.');
+      }
+});
+app.get('/searchUser', (req, res) => {
+    try {
+        // console.log(token);
+        // const decoded = verifyToken(token);
+        // console.log('Decoded:', decoded);
+        if(searchemail !==""){
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        console.log("email is " + searchemail)
+        SignUp.findOne({email: searchemail}).then(( allUsers) => {
             console.log(allUsers)
             res.status(200).json(allUsers)
         }).catch((e)=>{
