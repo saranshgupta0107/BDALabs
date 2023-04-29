@@ -1,14 +1,15 @@
 var express = require('express');
 var path = require('path');
 var bodyParser = require('body-parser');
+const cookieParser = require("cookie-parser");
 var mongoose = require("mongoose");
 const jwt = require('jsonwebtoken');
 const { config } = require('process');
 mongoose.Promise = global.Promise;
 mongoose.connect("mongodb+srv://admin:xhBJxsjAn8oLKR6k@main.dttg1p4.mongodb.net/BDA_Labs");
-var loginemail = "";
 var searchemail = "IIT2021153@iiita.ac.in";
-const secretKey = 'secret';
+const adminKey = 'admin';
+const userKey = 'user';
 
 var signUpSchema = new mongoose.Schema({
     email: String,
@@ -75,14 +76,23 @@ module.exports={
        })
     }
 }
-const createToken = (payload) => {
-    return jwt.sign(payload, secretKey, { expiresIn: '1h' });
+const createAdminToken = (payload) => {
+    return jwt.sign(payload, adminKey, { expiresIn: '1h' });
   };
 
-const verifyToken = (token) => {
-    return jwt.verify(token, secretKey);
+const verifyAdminToken = (token) => {
+    return jwt.verify(token, adminKey);
   };
-var token = "";
+
+const createUserToken = (payload) => {
+    return jwt.sign(payload, userKey, { expiresIn: '1h' });
+  };
+
+const verifyUserToken = (token) => {
+    return jwt.verify(token, userKey);
+  };
+
+
 var Login = mongoose.model("Login", loginSchema,"Login");
 var SignUp = mongoose.model("SignUp", signUpSchema,"Login");
 var UserProject = mongoose.model("User_Project_Relation", userProjectSchema,"User_Project_Relation");
@@ -100,11 +110,12 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use('/public', express.static(path.join(__dirname, "../public")));
 app.use('/Images', express.static(path.join(__dirname, "../Images")));
+app.use(cookieParser());
 
 async function DelOne(collection,res,query,token,dep)
 {
     try {
-        verifyToken(token);
+        verifyAdminToken(token);
         var myData = await collection.findOneAndDelete(query);
         var doc = await dep.find({ArrayID:myData._id})
         for(i = 0;i<doc.length;i++)
@@ -145,7 +156,7 @@ function AddOne(collection,res,req,token)
 {
     try {
         console.log(token);
-        const decoded = verifyToken(token);
+        const decoded = verifyAdminToken(token);
         console.log('Decoded:', decoded);
         var myData = new collection(req.body);
         myData.save()
@@ -188,9 +199,11 @@ app.post('/publicationInput', function (req, res) {
 app.post('/login_admin', (req, res) => {
     SignUp.find({"email":req.body.email,"password":req.body.password,"admin":true}).then((User) => {
         console.log(User)
-        loginemail = req.body.email;
-        token = createToken({User},config.secretKey);
+        token = createAdminToken({User},config.adminKey);
         console.log('Token:', token);
+        res.cookie('loginemail',req.body.email);
+        res.cookie('email',req.body.email);
+        res.cookie('auth',token);
         res.redirect('/admin');
     }).catch((error)=>{
         console.log(error);
@@ -202,9 +215,13 @@ app.post('/login_admin', (req, res) => {
 
 app.post('/login_user', (req, res) => {
     SignUp.find({email:req.body.email,password:req.body.password}).then((User) => {
+        var token = req.cookies.auth;
         console.log(User)
         loginemail = req.body.email;
-        token = createToken({User},config.secretKey);
+        token = createUserToken({User},config.adminKey);
+        res.cookie('loginemail',req.body.email);
+        res.cookie('email',req.body.email);
+        res.cookie('auth',token);
         console.log('Token:', token);
         res.redirect('/login_user1');
     }).catch((error)=>{
@@ -213,23 +230,36 @@ app.post('/login_user', (req, res) => {
         }).status(400);
     })
 });
-// app.post('/search_user', (req, res) => {
-//     SignUp.find({email:req.body.email,password:req.body.password}).then((User) => {
-//         console.log(User)
-//         loginemail = req.body.email;
-//         token = createToken({User},config.secretKey);
-//         console.log('Token:', token);
-//         res.redirect('/search_user1');
-//     }).catch((error)=>{
-//         res.json({
-//             error: "Account not found!"  
-//         }).status(400);
-//     })
-// });
+app.post('/search_user', (req, res) => {
+    if(req.body.email != '')
+    {
+    SignUp.find({email:req.body.email}).then((User) => {
+        console.log(User)
+        res.cookie('email',req.body.email);
+        res.redirect('/search_user1');
+     }).catch((error)=>{
+        res.json({
+            error: "Account not found!"
+         }).status(400);
+     })
+    }
+    else
+    {
+        SignUp.find({email:req.cookies.loginemail}).then((User) => {
+            console.log(User)
+            res.redirect('/search_user1');
+         }).catch((error)=>{
+            res.json({
+                error: "Account not found!"
+             }).status(400);
+         })
+    }
+});
 app.post('/coursesInput', function (req, res) {
     try {
+        var token = req.cookies.auth;
         console.log(token);
-        const decoded = verifyToken(token);
+        const decoded = verifyAdminToken(token);
         console.log('Decoded:', decoded);
         var myData = new courses(req.body);
         const options = {
@@ -252,8 +282,9 @@ app.post('/coursesInput', function (req, res) {
 
 app.post('/publications', function (req, res) {
     try {
+        var token = req.cookies.auth;
         console.log(token);
-        const decoded = verifyToken(token);
+        const decoded = verifyAdminToken(token);
         console.log('Decoded:', decoded);
         var myData = new publication(req.body);
         const options = {
@@ -274,8 +305,9 @@ app.post('/publications', function (req, res) {
 
 app.post('/projects', function (req, res) {
     try {
+        var token = req.cookies.auth;
         console.log(token);
-        const decoded = verifyToken(token);
+        const decoded = verifyAdminToken(token);
         console.log('Decoded:', decoded);
         var myData = new projects(req.body);
         const options = {
@@ -298,6 +330,7 @@ app.post('/projects', function (req, res) {
 async function addUserDep(Relation,myData,req,res,options)
 {
     try{
+        var token = req.cookies.auth;
         for(var i = 0;i<req.length;i++)
         {
             var x = await SignUp.findOne({email:req[i]},options);
@@ -337,8 +370,9 @@ async function addUserDep(Relation,myData,req,res,options)
 
 app.post('/courses', function (req, res) {
     try {
+        var token = req.cookies.auth;
         console.log(token);
-        const decoded = verifyToken(token);
+        const decoded = verifyAdminToken(token);
         console.log('Decoded:', decoded);
         var myData = new courses(req.body);
         const options = {
@@ -386,8 +420,9 @@ app.get('/login_admin', function (req, res) {
 
 app.get('/login_user1', function (req, res) {
     try {
+        var token = req.cookies.auth;
         console.log(token);
-        const decoded = verifyToken(token);
+        const decoded = verifyUserToken(token);
         console.log('Decoded:', decoded);
         let x = path.join(__dirname,'../');
         res.sendFile(x + '/user1.html');
@@ -397,10 +432,25 @@ app.get('/login_user1', function (req, res) {
       }
 });
 
+app.get('/search_user1', function (req, res) {
+    try {
+        var token = req.cookies.auth;
+        console.log(token);
+        const decoded = verifyUserToken(token);
+        console.log('Decoded:', decoded);
+        let x = path.join(__dirname,'../');
+        res.sendFile(x + '/search1.html');
+      }
+      catch (error) {
+        res.status(400).send('Error: User Login not detected.');
+      }
+});
+
 app.get('/publicationInput', function (req, res) {
     try {
+        var token = req.cookies.auth;
         console.log(token);
-        const decoded = verifyToken(token);
+        const decoded = verifyAdminToken(token);
         console.log('Decoded:', decoded);
         let x = path.join(__dirname,'../');
         res.sendFile(x + '/publication.html');
@@ -412,8 +462,9 @@ app.get('/publicationInput', function (req, res) {
 
 app.get('/projectdelete', function (req, res) {
     try {
+        var token = req.cookies.auth;
         console.log(token);
-        const decoded = verifyToken(token);
+        const decoded = verifyAdminToken(token);
         console.log('Decoded:', decoded);
         let x = path.join(__dirname,'../');
         res.sendFile(x + '/projectdelete.html');
@@ -430,8 +481,9 @@ app.get('/login_user', function (req, res) {
 
 app.get('/coursedelete', function (req, res) {
     try {
+        var token = req.cookies.auth;
         console.log(token);
-        const decoded = verifyToken(token);
+        const decoded = verifyAdminToken(token);
         console.log('Decoded:', decoded);
         let x = path.join(__dirname,'../');
         res.sendFile(x + '/coursedelete.html');
@@ -443,8 +495,9 @@ app.get('/coursedelete', function (req, res) {
 
 app.get('/admin', function (req, res) {
     try {
+        var token = req.cookies.auth;
         console.log(token);
-        const decoded = verifyToken(token);
+        const decoded = verifyAdminToken(token);
         console.log('Decoded:', decoded);
         let x = path.join(__dirname,'../');
         res.sendFile(x + '/admin.html');
@@ -461,8 +514,9 @@ app.get('/signup', function (req, res) {
 
 app.get('/courseInput', function (req, res) {
     try {
+        var token = req.cookies.auth;
         console.log(token);
-        const decoded = verifyToken(token);
+        const decoded = verifyAdminToken(token);
         console.log('Decoded:', decoded);
         let x = path.join(__dirname,'../');
         res.sendFile(x + '/courses.html');
@@ -473,6 +527,7 @@ app.get('/courseInput', function (req, res) {
 });
 app.get('/publications', function (req, res) {
     try {
+        var token = req.cookies.auth;
         console.log(token);
         publication.find().then(( allUsers) => {
             console.log(allUsers)
@@ -489,8 +544,9 @@ app.get('/publications', function (req, res) {
 
 app.get('/peopleInput', function (req, res) {
     try {
+        var token = req.cookies.auth;
         console.log(token);
-        const decoded = verifyToken(token);
+        const decoded = verifyAdminToken(token);
         console.log('Decoded:', decoded);
         let x = path.join(__dirname,'../');
         res.sendFile(x + '/people.html');
@@ -502,8 +558,9 @@ app.get('/peopleInput', function (req, res) {
 
 app.get('/projectInput', function (req, res) {
     try {
+        var token = req.cookies.auth;
         console.log(token);
-        const decoded = verifyToken(token);
+        const decoded = verifyAdminToken(token);
         console.log('Decoded:', decoded);
         let x = path.join(__dirname,'../');
         res.sendFile(x + '/projects.html');
@@ -515,8 +572,9 @@ app.get('/projectInput', function (req, res) {
 
 app.get('/peopledelete', function (req, res) {
     try {
+        var token = req.cookies.auth;
         console.log(token);
-        const decoded = verifyToken(token);
+        const decoded = verifyAdminToken(token);
         console.log('Decoded:', decoded);
         let x = path.join(__dirname,'../');
         res.sendFile(x + '/peopledelete.html');
@@ -529,7 +587,7 @@ app.get('/peopledelete', function (req, res) {
 app.get('/users', (req, res) => {
     try {
         // console.log(token);
-        // const decoded = verifyToken(token);
+        // const decoded = verifyAdminToken(token);
         // console.log('Decoded:', decoded);
         res.setHeader('Access-Control-Allow-Origin', '*');
         SignUp.find().then(( allUsers) => {
@@ -546,8 +604,9 @@ app.get('/users', (req, res) => {
 });
 app.get('/user', (req, res) => {
     try {
+        var token = req.cookies.auth;
         console.log(token);
-        const decoded = verifyToken(token);
+        const decoded = verifyUserToken(token);
         console.log('Decoded:', decoded);
         if(loginemail !==""){
         res.setHeader('Access-Control-Allow-Origin', '*');
@@ -566,14 +625,16 @@ app.get('/user', (req, res) => {
    }
       } 
       catch (error) {
-        res.status(400).send('Error: Admin Login not detected.');
+        res.status(400).send('Error: User Login not detected.');
       }
 });
 app.get('/searchUser', (req, res) => {
     try {
-        // console.log(token);
-        // const decoded = verifyToken(token);
-        // console.log('Decoded:', decoded);
+        var token = req.cookies.auth;
+        var searchemail = req.cookies.email;
+        console.log(token);
+        const decoded = verifyUserToken(token);
+        console.log('Decoded:', decoded);
         if(searchemail !==""){
         res.setHeader('Access-Control-Allow-Origin', '*');
         console.log("email is " + searchemail)
@@ -597,7 +658,7 @@ app.get('/searchUser', (req, res) => {
 app.get('/userMail', (req, res) => {
     try {
         // console.log(token);
-        // const decoded = verifyToken(token);
+        // const decoded = verifyAdminToken(token);
         // console.log('Decoded:', decoded);
         // if(loginemail !==""){
         res.setHeader('Access-Control-Allow-Origin', '*');

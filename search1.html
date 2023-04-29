@@ -18,9 +18,13 @@
   
 <script>
 	 
-        fetch('http://localhost:3000/serachUser').then((res)=>res.json()).then(async(data)=>{
+        fetch('http://localhost:3000/searchUser').then((res)=>res.json()).then(async(data)=>{
     console.log(data)
-   
+	const search = document.createElement('p');
+	search.innerHTML = `<div class = "search"> 
+		<form method = "POST" action = "/search_user">
+		<input type="text" name="email" id="email" placeholder="search">
+		</form></div>`;
       const nameParent = document.getElementById('name');
 // const ul = document.createElement('ul');
 // const li = document.createElement('li');
@@ -119,6 +123,7 @@ p3.innerHTML = `<h2 class="heading">Enrolled Projects</h2>`
 			
 
 nameParent.appendChild(p1);
+nameParent.appendChild(search);
 nameParent.appendChild(p2);
 nameParent.appendChild(p3);
 nameParent.appendChild(p4);
