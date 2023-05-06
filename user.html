@@ -9,29 +9,32 @@
 </head>
 <body>
   
-  <div class="container">
-    <nav>
-      <div class="side_navbar">
-        <span>Main Menu</span>
-        <a href="#" class="active">Dashboard</a>
-        <a href="#">Profile</a>
-        <a href="#">Publication</a>
-        <a href="#">Project</a>
-        <a href="#">Subject As TA</a>
-      </div>
-    </nav>
+	  
 
     <div class="main-body">
-      <h2>Profile </h2>
+      <!-- <h2>Profile </h2> -->
       <div class="promo_card">
         <h1>Welcome User Name</h1>
-        <span>Search for other Users</span>
+        <!-- <span>Search for other Users</span> -->
       </div>
+	  <div class="container">
+		
+		<div class="topnav">
+			<a class="active" href="#home">Home</a>
+			<a href="#about">Profile</a>
+			<a href="#contact">Publication</a>
+			<a href="#contact">Project</a>
+			<a href="#contact">Subject As TA</a>
+			<!-- <input type="text" placeholder="Search.."> -->
+			<form method = "POST" action = "/search_user">
+				<input type="text" name="" id="" placeholder="search">
+			</form>
+		  </div>
 
-	  <div class = "search"> 
+	  <!-- <div class = "search"> 
 		<form method = "POST" action = "/search_user">
 		<input type="text" name="" id="" placeholder="search">
-		</form></div>
+		</form></div> -->
       <div class="history_lists">
         <div class="list1">
           <div class="row">
