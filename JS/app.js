@@ -316,11 +316,11 @@ app.post('/login_user', (req, res) => {
     })
 });
 
-app.post('/search_user', (req, res) => {
+app.post('/search_user', async(req, res) => {
     if(req.body.email != '')
     {
         console.log('hi');
-    Login.find({email:req.body.email}).then((User) => {
+    await SignUp.find({email:req.body.email}).then((User) => {
         console.log(User)
         res.cookie('email',req.body.email);
         res.redirect('/search_user1');
@@ -590,6 +590,7 @@ app.get('/user', (req, res) => {
 app.get('/searchUser', (req, res) => {
     try {
         var searchemail = req.cookies.email;
+        print("Search Email : " + searchemail)
         if(searchemail !==""){
         res.setHeader('Access-Control-Allow-Origin', '*');
         console.log("email is " + searchemail)

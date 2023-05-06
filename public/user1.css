@@ -38,6 +38,15 @@ body{
   background: rgb(37, 37, 37);
 }
 
+.promo_card h1, .promo_card span, button{
+  margin: 10px;
+}
+.promo_card button{
+  display: block;
+  padding: 6px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+}
 
 .row{
   display: flex;
@@ -60,6 +69,7 @@ body{
 .heading{
   position: relative;
   right: 10px;
+  margin-top: 25px;
 }
 
 label {
@@ -72,3 +82,39 @@ label {
   display: flex;
   flex-direction: column;
 }
+.topnav a {
+  float: left;
+  display: block;
+  color: black;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+  font-size: 17px;
+  /* margin: 15px; */
+}
+
+/* Change the color of links on hover */
+.topnav a:hover {
+  background-color: #ddd;
+  color: black;
+}
+
+/* Style the "active" element to highlight the current page */
+.topnav a.active {
+  background-color: #ddd;
+  color: black;
+}
+
+/* Style the search box inside the navigation bar */
+.topnav input[type=text] {
+  float: right;
+  padding: 6px;
+  border: none;
+  margin-top: 8px;
+  margin-right: 16px;
+  font-size: 17px;
+}
+
+/* #Pub{
+  margin-top: 15px;
+} */
