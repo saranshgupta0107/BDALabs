@@ -6,8 +6,8 @@ var mongoose = require("mongoose");
 const jwt = require('jsonwebtoken');
 const { config } = require('process');
 const { addListener } = require('nodemon');
-const notifier = require('node-notifier');
-const { Sign } = require('crypto');
+const notifier = require('node-notifier')
+const bcrypt = require('bcrypt');
 mongoose.Promise = global.Promise;
 mongoose.connect("mongodb+srv://admin:xhBJxsjAn8oLKR6k@main.dttg1p4.mongodb.net/BDA_Labs");
 const adminKey = 'admin';
@@ -235,10 +235,10 @@ async function addUserDep(Relation,myData,req,res,options)
 
 //app.post begins here.
 
-app.post('/signup', function (req, res) {
+app.post('/signup', async function (req, res) {
     var myData = new SignUp(req.body);
-    var x;
-    var flag = true;
+    var salt = await bcrypt.genSalt();
+    myData.password = await bcrypt.hash(req.body.password, salt);
     myData.save()
     .then(item => {
         res.redirect("/");
@@ -248,15 +248,26 @@ app.post('/signup', function (req, res) {
     });
 });
 
-app.post('/login_admin', (req, res) => {
-    Login.find({"email":req.body.email, "password":req.body.password, "admin":true}).then((User) => {
+app.post('/login_admin', async (req, res) => {
+    await Login.find({"email":req.body.email, "admin":true}).then(async (User) => {
         if(User != '')
         {
-            token = createAdminToken({User},config.adminKey);
-            console.log('Token:', token);
-            res.cookie('loginemail',req.body.email);
-            res.cookie('auth',token);
-            res.redirect('/admin');
+            if (await bcrypt.compare(req.body.password,User[0].password)) {
+                token = createAdminToken({User},config.adminKey);
+                console.log('Token:', token);
+                res.cookie('loginemail',req.body.email);
+                res.cookie('auth',token);
+                res.redirect('/admin');
+            }
+            else
+            {
+                notifier.notify(
+                    {
+                      title: 'BDA Labs',
+                      message: 'Invalid Credentials',
+                    });
+                res.redirect("/login_admin");
+            }
         }
         else
         {
@@ -276,15 +287,17 @@ app.post('/login_admin', (req, res) => {
 });
 
 app.post('/login_user', (req, res) => {
-    Login.find({"email":req.body.email, "password":req.body.password}).then((User) => {
+    Login.find({"email":req.body.email}).then(async (User) => {
         if(User != '')
         {
+            if (await bcrypt.compare(req.body.password,User[0].password)) {
             token = createUserToken({User},config.userKey);
             console.log('Token:', token);
             res.cookie('loginemail',req.body.email);
             res.cookie('email',req.body.email);
             res.cookie('auth',token);
             res.redirect('/userdashboard');
+            }
         }
         else
         {
@@ -302,9 +315,11 @@ app.post('/login_user', (req, res) => {
         }).status(400);
     })
 });
+
 app.post('/search_user', (req, res) => {
     if(req.body.email != '')
     {
+        console.log('hi');
     Login.find({email:req.body.email}).then((User) => {
         console.log(User)
         res.cookie('email',req.body.email);
@@ -315,16 +330,21 @@ app.post('/search_user', (req, res) => {
          }).status(400);
      })
     }
-    else
+    else if(req.cookies.loginemail != '')
     {
         Login.find({email:req.cookies.loginemail}).then((User) => {
             console.log(User)
-            res.redirect('/search_user1');
+            res.cookie('email',loginemail);
+            res.redirect('/userdashboard');
          }).catch((error)=>{
             res.json({
                 error: "Account not found!"
              }).status(400);
          })
+    }
+    else
+    {
+        console.log('error');
     }
 });
 
@@ -340,6 +360,8 @@ app.post('/courses', function (req, res) {
     AddOne(courses,UserCourse,res,req,req.body.ta);
 });
 
+//app.get begins here
+
 app.get('/', function (req, res) {
     let x = path.join(__dirname,'../');
     res.sendFile(x + '/index.html');
@@ -349,6 +371,13 @@ app.get('/login_admin', function (req, res) {
     let x = path.join(__dirname,'../');
     res.sendFile(x + '/login_admin.html');
 });
+
+app.get('/logout',(req,res)=>{
+    res.cookie('loginemail','');
+    res.cookie('email','');
+    res.cookie('auth','');
+    res.redirect('/');
+})
 
 app.get('/userdashboard', function (req, res) {
     try {
@@ -366,15 +395,11 @@ app.get('/userdashboard', function (req, res) {
 
 app.get('/search_user1', function (req, res) {
     try {
-        var token = req.cookies.auth;
-        console.log(token);
-        const decoded = verifyUserToken(token);
-        console.log('Decoded:', decoded);
         let x = path.join(__dirname,'../');
         res.sendFile(x + '/search1.html');
       }
       catch (error) {
-        res.status(400).send('Error: User Login not detected.');
+        res.status(400).send('Error: Unknown');
       }
 });
 
@@ -519,9 +544,9 @@ app.get('/peopledelete', function (req, res) {
 
 app.get('/users', (req, res) => {
     try {
-        // console.log(token);
-        // const decoded = verifyAdminToken(token);
-        // console.log('Decoded:', decoded);
+        console.log(token);
+        const decoded = verifyAdminToken(token);
+        console.log('Decoded:', decoded);
         res.setHeader('Access-Control-Allow-Origin', '*');
         SignUp.find().then(( allUsers) => {
             console.log(allUsers)
@@ -564,11 +589,7 @@ app.get('/user', (req, res) => {
 });
 app.get('/searchUser', (req, res) => {
     try {
-        var token = req.cookies.auth;
         var searchemail = req.cookies.email;
-        console.log(token);
-        const decoded = verifyUserToken(token);
-        console.log('Decoded:', decoded);
         if(searchemail !==""){
         res.setHeader('Access-Control-Allow-Origin', '*');
         console.log("email is " + searchemail)
@@ -591,10 +612,6 @@ app.get('/searchUser', (req, res) => {
 });
 app.get('/userMail', (req, res) => {
     try {
-        // console.log(token);
-        // const decoded = verifyAdminToken(token);
-        // console.log('Decoded:', decoded);
-        // if(loginemail !==""){
         res.setHeader('Access-Control-Allow-Origin', '*');
         Login.find({email: req.query.email}).then(( user) => {
             console.log(user)
@@ -604,10 +621,6 @@ app.get('/userMail', (req, res) => {
             res.status(400).send(e)
         
     })
-//    }
-//    else{
-//     res.status(400).send("NO DATA")
-//    }
       } 
       catch (error) {
         res.status(400).send('Error: Admin Login not detected.');
@@ -741,21 +754,21 @@ app.get('/people', (req, res) => {
     })
 });
 
+app.get('/admins', (req, res) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    var arr = []
+    SignUp.find({admin:true}).then(( allPeoples) => {
+        allPeoples.forEach((Element)=>{
+            arr.push(Element)
+        })
+        res.status(200).json(arr)
 
+    }).catch((e)=>{
+        console.log(e)
+        res.status(400).send(e)
+    })
+});
 
-// app.get('/logged',(req,res) =>{
-//     res.setHeader('Access-Control-Allow-Origin', '*');
-//     if(loginemail !== "" ){
-//  const logJSON = {
-//     loginemail 
-//  }
-//  res.status(200).json(logJSON);
-// }
-// else{
-//     res.status(400).send("NO DATA");
-// }
-// }
-// )
 app.delete('/projects/delete', (req, res) => {
     var token = req.cookies.auth;
     res.setHeader('Access-Control-Allow-Origin', '*');

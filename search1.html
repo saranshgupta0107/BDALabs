@@ -44,12 +44,8 @@ p2.innerHTML = `<h2 class="heading">Publications</h2>`
 			const projectLinker = await fetch('http://localhost:3000/userProject').then((res)=>res.json()).then(async(data)=>{
 				return data[0] 
 			})
-			const courseLinker = await fetch('http://localhost:3000/userCourse').then((res)=>res.json()).then(async(data)=>{
-				return data[0] 
-			})
 			const pubIDS = pubLinker.ArrayID; 
 			const projectIDS = projectLinker.ArrayID ;
-			const courseIDS = courseLinker.ArrayID ;
 			console.log("ARRAYS ARE " + pubIDS)
 	      await pubIDS.forEach(async element => {
 			const pubURL = 'http://localhost:3000/publication?id=' + element
@@ -66,8 +62,6 @@ p2.innerHTML = `<h2 class="heading">Publications</h2>`
 			<p>${publication.name}</p>
 			<label for="Supervisor">Supervisor:</label>
 			<p>${auth}</p>
-			<label for="Couse Name:">Publisher:</label>
-			<p>${publication.publisher}</p>
 			<label for="Publication Date: ">Publication Date: </label>
 			<p>${publication.pub_date}</p>
 			
@@ -97,36 +91,11 @@ p3.innerHTML = `<h2 class="heading">Enrolled Projects</h2>`
 				
 			});
 			
-			const p4 = document.createElement('p');
-			p4.innerHTML = `<h2 class="heading">Enrolled Courses</h2>`  
-			await courseIDS.forEach(async element => {
-			const projectURL = 'http://localhost:3000/course?id=' + element
-			const course = await fetch(projectURL).then((res)=>res.json()).then(async(data)=>{
-				return data
-			})
-			var cou = []
-			course.ta.forEach((element)=>{
-				cou.push( " "+ element )
-			})
-			console.log(course)
-			p4.innerHTML = p4.innerHTML + `<div class="card_Courses">
-			<div class="card1">
-			<label for=" Course_Name">Course Name:</label>
-			<p>${course.course_name}</p>
-			<label for="Instructor">Instructor:</label>
-			<p>${course.instructor}</p>
-			<label for="TA">TAs:</label>
-			<p>${cou}</p>
-		</div>  `
-				
-			});
-			
 
 nameParent.appendChild(p1);
 nameParent.appendChild(search);
 nameParent.appendChild(p2);
 nameParent.appendChild(p3);
-nameParent.appendChild(p4);
 // p2.textContent = 'Description : ' + element.description;
 // const p4 = document.createElement('p');
 // p4.innerHTML = `<button class="button1" onclick="deleteProjects('${element.name}')">Delete</button> `

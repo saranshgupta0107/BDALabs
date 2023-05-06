@@ -29,7 +29,7 @@
           <a class="nav-link" href="#Courses">Courses</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="#People">Team</a>
+          <a class="nav-link" href="#People">Admin Team</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="/login_admin">Admin Login</a>
@@ -40,6 +40,12 @@
         <li class="nav-item">
           <a class="nav-link" href="/signup">Sign Up</a>
         </li>
+        <li>
+          <div class = "search"> 
+            <form method = "POST" action = "/search_user">
+            <input type="text" name="email" id="email" placeholder="search">
+            </form></div>
+        </li>>
       </ul>
     </div>
   </nav>
@@ -209,7 +215,7 @@ parent.appendChild(ul);
   })
 
 
-  fetch('http://localhost:3000/people',).then((res)=>res.json()).then((data)=>{
+  fetch('http://localhost:3000/admins',).then((res)=>res.json()).then((data)=>{
     console.log(data)
     data.forEach(element => {
       const parent = document.getElementById('People');
