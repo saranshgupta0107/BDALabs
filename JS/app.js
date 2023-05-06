@@ -169,6 +169,7 @@ async function DelOne(collection,res,key,token,dep)
 function AddOne(collection,dep,res,req,query)
 {
     try {
+        console.log(req.body);
         var token = req.cookies.auth;
         verifyAdminToken(token);
         var myData = new collection(req.body);
@@ -353,6 +354,8 @@ app.post('/publications', function (req, res) {
 });
 
 app.post('/projects', function (req, res) {
+    var x = req.body.authors.toString();
+    req.body.authors = x.split(',');
     AddOne(projects,UserProject,res,req,req.body.authors);
 });
 
