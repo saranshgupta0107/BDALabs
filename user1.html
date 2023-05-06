@@ -1,68 +1,86 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Admin Dashboard | By Code Info</title>
-  <link rel="stylesheet" href="/public/user1.css" />
-  <!-- Font Awesome Cdn Link -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" />
-</head>
-<body>
-	<div class="container">
 
+<head>
+	<meta charset="UTF-8" />
+	<title>Admin Dashboard | By Code Info</title>
+	<link rel="stylesheet" href="/public/user1.css" />
+	<!-- Font Awesome Cdn Link -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" />
+</head>
+
+<body>
+	<div class="container" style="display:flex;flex-direction:column;">
+        <div class="main-body" id="sabsePehle">
+			
+		</div>
+		<div class="main-body" id="pehle">
+			
+		</div>
 		<div class="main-body" id="name">
-			<li class="nav-item">
-				<a class="nav-link" href = '/logout'>Logout</a>
-			  </li>
-		  </div>
-	
-		   
-  
-<script>
-	 
-        fetch('http://localhost:3000/user').then((res)=>res.json()).then(async(data)=>{
-    console.log(data)
-	const search = document.createElement('p');
-	search.innerHTML = `<div class = "search"> 
-		<form method = "POST" action = "/search_user">
-		<input type="text" name="email" id="email" placeholder="search">
-		</form></div>`;
-      const nameParent = document.getElementById('name');
-// const ul = document.createElement('ul');
-// const li = document.createElement('li');
-// const h3 = document.createElement('h3');
-// h3.textContent = element.course_name;
-const p1 = document.createElement('p');
-p1.innerHTML = `<h2>Profile </h2>
+			
+		</div>
+		
+
+
+
+		<script>
+
+			fetch('http://localhost:3000/user').then((res) => res.json()).then(async (data) => {
+				console.log(data)
+				const search = document.createElement('p');
+				search.innerHTML = `
+		<div class="topnav">
+			<div class="ab">
+			<a class="active" href="#home">Home</a>
+			<a href="#about">Profile</a>
+			<a href="#Pub">Publication</a>
+			<a href="#Pro">Project</a>
+			<a href="#Cou">Subject As TA</a>
+			<!-- <input type="text" placeholder="Search.."> -->
+			<form method = "POST" action = "/search_user">
+				<input type="text" name="" id="" placeholder="search">
+			</form>
+		  </div>	
+		  </div>`;
+		  const sabkeParent = document.getElementById('sabsePehle');
+				const nameParent = document.getElementById('name');
+				const pehleParent = document.getElementById('pehle');
+				// const ul = document.createElement('ul');
+				// const li = document.createElement('li');
+				// const h3 = document.createElement('h3');
+				// h3.textContent = element.course_name;
+				const p1 = document.createElement('p');
+				p1.innerHTML = `
       <div class="promo_card">
         <h1>Welcome  ${data.fname}  ${data.lname}</h1>
         <span>${data.email}</span>`
-// p1.textContent = "Project Name: " + element.name;
-const p2 = document.createElement('p');
-p2.innerHTML = `<h2 class="heading">Publications</h2>`
-		const pubLinker = await fetch('http://localhost:3000/userPublication').then((res)=>res.json()).then(async(data)=>{
-				return data[0] 
-			})
-			const projectLinker = await fetch('http://localhost:3000/userProject').then((res)=>res.json()).then(async(data)=>{
-				return data[0] 
-			})
-			const courseLinker = await fetch('http://localhost:3000/userCourse').then((res)=>res.json()).then(async(data)=>{
-				return data[0] 
-			})
-			const pubIDS = pubLinker.ArrayID; 
-			const projectIDS = projectLinker.ArrayID ;
-			const courseIDS = courseLinker.ArrayID ;
-			console.log("ARRAYS ARE " + pubIDS)
-	      await pubIDS.forEach(async element => {
-			const pubURL = 'http://localhost:3000/publication?id=' + element
-			const publication = await fetch(pubURL).then((res)=>res.json()).then(async(data)=>{
-				return data[0] 
-			})
-			var auth = []
-			publication.authors.forEach((element)=>{
-				auth.push( " " + element )
-			})
-		p2.innerHTML = p2.innerHTML + `<div class="card_Paper">
+				// p1.textContent = "Project Name: " + element.name;
+				const p2 = document.createElement('p');
+				p2.innerHTML = `<h2 class="heading" id="Pub">Publications</h2>`
+				const pubLinker = await fetch('http://localhost:3000/userPublication').then((res) => res.json()).then(async (data) => {
+					return data[0]
+				})
+				const projectLinker = await fetch('http://localhost:3000/userProject').then((res) => res.json()).then(async (data) => {
+					return data[0]
+				})
+				const courseLinker = await fetch('http://localhost:3000/userCourse').then((res) => res.json()).then(async (data) => {
+					return data[0]
+				})
+				const pubIDS = pubLinker.ArrayID;
+				const projectIDS = projectLinker.ArrayID;
+				const courseIDS = courseLinker.ArrayID;
+				console.log("ARRAYS ARE " + pubIDS)
+				await pubIDS.forEach(async element => {
+					const pubURL = 'http://localhost:3000/publication?id=' + element
+					const publication = await fetch(pubURL).then((res) => res.json()).then(async (data) => {
+						return data[0]
+					})
+					var auth = []
+					publication.authors.forEach((element) => {
+						auth.push(" " + element)
+					})
+					p2.innerHTML = p2.innerHTML + `<div class="card_Paper">
 			<div class="card1">
 			<label for="Publication ">Publication Name:</label>
 			<p>${publication.name}</p>
@@ -77,17 +95,17 @@ p2.innerHTML = `<h2 class="heading">Publications</h2>`
 			<p>${publication.location}</p>
 		</div>  
 		</div>`
-	
-				
-			});
-		const p3 = document.createElement('p');
-p3.innerHTML = `<h2 class="heading">Enrolled Projects</h2>`  
-			await projectIDS.forEach(async element => {
-			const projectURL = 'http://localhost:3000/project?id=' + element
-			const project = await fetch(projectURL).then((res)=>res.json()).then(async(data)=>{
-				return data
-			})
-			p3.innerHTML = p3.innerHTML + `<div class="card_Projects">
+
+
+				});
+				const p3 = document.createElement('p');
+				p3.innerHTML = `<h2 class="heading" id="Pro">Enrolled Projects</h2>`
+				await projectIDS.forEach(async element => {
+					const projectURL = 'http://localhost:3000/project?id=' + element
+					const project = await fetch(projectURL).then((res) => res.json()).then(async (data) => {
+						return data
+					})
+					p3.innerHTML = p3.innerHTML + `<div class="card_Projects">
 			<div class="card1">
 			<label for=" Name">Project Name:</label>
 			<p>${project.name}</p>
@@ -96,22 +114,22 @@ p3.innerHTML = `<h2 class="heading">Enrolled Projects</h2>`
 			<label for="Instructor">Instructor:</label>
 			<p>Ratan Tata</p>
 		</div>  `
-				
-			});
-			
-			const p4 = document.createElement('p');
-			p4.innerHTML = `<h2 class="heading">Enrolled Courses</h2>`  
-			await courseIDS.forEach(async element => {
-			const projectURL = 'http://localhost:3000/course?id=' + element
-			const course = await fetch(projectURL).then((res)=>res.json()).then(async(data)=>{
-				return data
-			})
-			var cou = []
-			course.ta.forEach((element)=>{
-				cou.push( " "+ element )
-			})
-			console.log(course)
-			p4.innerHTML = p4.innerHTML + `<div class="card_Courses">
+
+				});
+
+				const p4 = document.createElement('p');
+				p4.innerHTML = `<h2 class="heading" id="Cou">Enrolled Courses</h2>`
+				await courseIDS.forEach(async element => {
+					const projectURL = 'http://localhost:3000/course?id=' + element
+					const course = await fetch(projectURL).then((res) => res.json()).then(async (data) => {
+						return data
+					})
+					var cou = []
+					course.ta.forEach((element) => {
+						cou.push(" " + element)
+					})
+					console.log(course)
+					p4.innerHTML = p4.innerHTML + `<div class="card_Courses">
 			<div class="card1">
 			<label for=" Course_Name">Course Name:</label>
 			<p>${course.course_name}</p>
@@ -120,32 +138,33 @@ p3.innerHTML = `<h2 class="heading">Enrolled Projects</h2>`
 			<label for="TA">TAs:</label>
 			<p>${cou}</p>
 		</div>  `
-				
-			});
-			
-nameParent.appendChild(p1);
-nameParent.appendChild(search);
-nameParent.appendChild(p2);
-nameParent.appendChild(p3);
-nameParent.appendChild(p4);
-// p2.textContent = 'Description : ' + element.description;
-// const p4 = document.createElement('p');
-// p4.innerHTML = `<button class="button1" onclick="deleteProjects('${element.name}')">Delete</button> `
-// p1.innerHTML= '<div style="font-weight:700; font-size:20px; display: flex; ">' + '<span style="margin-right:10px">' + p1.innerHTML +'</span>' +  p4.innerHTML + '</div>'
-// li.appendChild(h3);
-// li.appendChild(p1);
-// li.appendChild(p2);
-// // li.appendChild(p3);
-// ul.appendChild(li);
-// p2.innerHTML= '<div style="font-weight:500; font-size:18px">' + p2.innerHTML + '</div>'
-// p1.innerHTML = '<h3>' + p1.innerHTML + '</h3>'
-// parent.appendChild(ul);
-   
-  }).catch((e)=>{
-    console.log(e)
-    console.log("Error Occured!")
-  })
-	
-</script>
+
+				});
+
+				sabkeParent.appendChild(p1);
+				pehleParent.appendChild(search);
+				nameParent.appendChild(p2);
+				nameParent.appendChild(p3);
+				nameParent.appendChild(p4);
+				// p2.textContent = 'Description : ' + element.description;
+				// const p4 = document.createElement('p');
+				// p4.innerHTML = `<button class="button1" onclick="deleteProjects('${element.name}')">Delete</button> `
+				// p1.innerHTML= '<div style="font-weight:700; font-size:20px; display: flex; ">' + '<span style="margin-right:10px">' + p1.innerHTML +'</span>' +  p4.innerHTML + '</div>'
+				// li.appendChild(h3);
+				// li.appendChild(p1);
+				// li.appendChild(p2);
+				// // li.appendChild(p3);
+				// ul.appendChild(li);
+				// p2.innerHTML= '<div style="font-weight:500; font-size:18px">' + p2.innerHTML + '</div>'
+				// p1.innerHTML = '<h3>' + p1.innerHTML + '</h3>'
+				// parent.appendChild(ul);
+
+			}).catch((e) => {
+				console.log(e)
+				console.log("Error Occured!")
+			})
+
+		</script>
 </body>
+
 </html>
