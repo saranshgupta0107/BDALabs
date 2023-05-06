@@ -5,9 +5,11 @@ const cookieParser = require("cookie-parser");
 var mongoose = require("mongoose");
 const jwt = require('jsonwebtoken');
 const { config } = require('process');
+const { addListener } = require('nodemon');
+const notifier = require('node-notifier');
+const { Sign } = require('crypto');
 mongoose.Promise = global.Promise;
 mongoose.connect("mongodb+srv://admin:xhBJxsjAn8oLKR6k@main.dttg1p4.mongodb.net/BDA_Labs");
-var searchemail = "IIT2021153@iiita.ac.in";
 const adminKey = 'admin';
 const userKey = 'user';
 
@@ -23,7 +25,8 @@ var signUpSchema = new mongoose.Schema({
 
 var loginSchema = new mongoose.Schema({
     email: String,
-    password: String
+    password: String,
+    admin: Boolean
    });
 
 var userProjectSchema = new mongoose.Schema({
@@ -105,6 +108,9 @@ var publication = mongoose.model("Publications", publicationSchema,"Publications
 
 var app = express();
 const port = 3000;
+
+//app uses
+
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -112,11 +118,17 @@ app.use('/public', express.static(path.join(__dirname, "../public")));
 app.use('/Images', express.static(path.join(__dirname, "../Images")));
 app.use(cookieParser());
 
-async function DelOne(collection,res,query,token,dep)
+//functions
+
+/*async function that deletes the field with _id = key from collection and it's connecting entry in dependant collection : dep
+if admin is logged in. Example : course with _id = key removed from course and userCourse collections.
+*/
+
+async function DelOne(collection,res,key,token,dep)
 {
     try {
         verifyAdminToken(token);
-        var myData = await collection.findOneAndDelete(query);
+        var myData = await collection.findOneAndDelete(key);
         var doc = await dep.find({ArrayID:myData._id})
         for(i = 0;i<doc.length;i++)
         {
@@ -152,19 +164,23 @@ async function DelOne(collection,res,query,token,dep)
     }
 }
 
-function AddOne(collection,res,req,token)
+//function to add req.body fields from a form to a collection as an admin and create the links between collections using AddUserDep().
+
+function AddOne(collection,dep,res,req,query)
 {
     try {
-        console.log(token);
-        const decoded = verifyAdminToken(token);
-        console.log('Decoded:', decoded);
+        var token = req.cookies.auth;
+        verifyAdminToken(token);
         var myData = new collection(req.body);
-        myData.save()
-        .then(item => {
-        res.send(collection + " successful");
+        const options = {
+            projection: { _id: 1}
+          };
+        addUserDep(dep,myData._id,query,res,options);
+        myData.save().then(item => {
+            res.redirect("/admin");
         })
         .catch(err => {
-        res.status(400).send("unable to save to database");
+            res.status(400).send("unable to save to database");
         });
         }
         catch (error) {
@@ -172,165 +188,14 @@ function AddOne(collection,res,req,token)
         }
 }
 
-app.post('/signup', function (req, res) {
-    var myData = new SignUp(req.body);
-    var x;
-    var flag = true;
-    myData.save()
-    .then(item => {
-        res.redirect("/");
-    })
-    .catch(err => {
-    res.status(400).send("unable to save to database");
-    });
-});
-
-app.post('/publicationInput', function (req, res) {
-    var myData = new publication(req.body);
-    myData.save()
-    .then(item => {
-    res.send("Publication successful");
-    })
-    .catch(err => {
-    res.status(400).send("unable to save to database");
-    });
-});
-
-app.post('/login_admin', (req, res) => {
-    SignUp.find({"email":req.body.email,"password":req.body.password,"admin":true}).then((User) => {
-        console.log(User)
-        token = createAdminToken({User},config.adminKey);
-        console.log('Token:', token);
-        res.cookie('loginemail',req.body.email);
-        res.cookie('email',req.body.email);
-        res.cookie('auth',token);
-        res.redirect('/admin');
-    }).catch((error)=>{
-        console.log(error);
-        res.json({
-            error: "Account not found"
-        }).status(400);
-    })
-});
-
-app.post('/login_user', (req, res) => {
-    SignUp.find({email:req.body.email,password:req.body.password}).then((User) => {
-        var token = req.cookies.auth;
-        console.log(User)
-        loginemail = req.body.email;
-        token = createUserToken({User},config.adminKey);
-        res.cookie('loginemail',req.body.email);
-        res.cookie('email',req.body.email);
-        res.cookie('auth',token);
-        console.log('Token:', token);
-        res.redirect('/login_user1');
-    }).catch((error)=>{
-        res.json({
-            error: "Account not found!"  
-        }).status(400);
-    })
-});
-app.post('/search_user', (req, res) => {
-    if(req.body.email != '')
-    {
-    SignUp.find({email:req.body.email}).then((User) => {
-        console.log(User)
-        res.cookie('email',req.body.email);
-        res.redirect('/search_user1');
-     }).catch((error)=>{
-        res.json({
-            error: "Account not found!"
-         }).status(400);
-     })
-    }
-    else
-    {
-        SignUp.find({email:req.cookies.loginemail}).then((User) => {
-            console.log(User)
-            res.redirect('/search_user1');
-         }).catch((error)=>{
-            res.json({
-                error: "Account not found!"
-             }).status(400);
-         })
-    }
-});
-app.post('/coursesInput', function (req, res) {
-    try {
-        var token = req.cookies.auth;
-        console.log(token);
-        const decoded = verifyAdminToken(token);
-        console.log('Decoded:', decoded);
-        var myData = new courses(req.body);
-        const options = {
-            projection: { _id: 1}
-          };    
-        addUserDep(UserCourse,myData._id,req.body.ta,res,options);
-        myData.save().then(item => {
-            res.redirect("/admin");
-        })
-        .catch(err => {
-            res.status(400).send("unable to save to database");
-        });
-        }
-        catch (error) {
-            res.status(400).send('Error: Admin Login not detected.');
-        }
-});
-
-
-
-app.post('/publications', function (req, res) {
-    try {
-        var token = req.cookies.auth;
-        console.log(token);
-        const decoded = verifyAdminToken(token);
-        console.log('Decoded:', decoded);
-        var myData = new publication(req.body);
-        const options = {
-            projection: { _id: 1}
-          };    
-        addUserDep(UserPublication,myData._id,req.body.authors,res,options);
-        myData.save().then(item => {
-            res.redirect("/admin");
-        })
-        .catch(err => {
-            res.status(400).send("unable to save to database");
-        });
-        }
-        catch (error) {
-            res.status(400).send('Error: Admin Login not detected.');
-        }
-});
-
-app.post('/projects', function (req, res) {
-    try {
-        var token = req.cookies.auth;
-        console.log(token);
-        const decoded = verifyAdminToken(token);
-        console.log('Decoded:', decoded);
-        var myData = new projects(req.body);
-        const options = {
-            projection: { _id: 1}
-          };    
-        addUserDep(UserProject,myData._id,req.body.authors,res,options);
-        console.log(myData);
-        myData.save().then(item => {
-        res.redirect("/admin");
-        })
-        .catch(err => {
-            res.status(400).send("unable to save to database");
-        });
-        }
-        catch (error) {
-            res.status(400).send('Error: Admin Login not detected.');
-        }
-});
+/*
+async function addUserDep links user to a collection(course,publication,etc.) by adding entries in dependancy collections userCourse,
+userPublication,etc.
+*/
 
 async function addUserDep(Relation,myData,req,res,options)
 {
     try{
-        var token = req.cookies.auth;
         for(var i = 0;i<req.length;i++)
         {
             var x = await SignUp.findOne({email:req[i]},options);
@@ -368,44 +233,111 @@ async function addUserDep(Relation,myData,req,res,options)
     return true;
 }
 
-app.post('/courses', function (req, res) {
-    try {
-        var token = req.cookies.auth;
-        console.log(token);
-        const decoded = verifyAdminToken(token);
-        console.log('Decoded:', decoded);
-        var myData = new courses(req.body);
-        const options = {
-            projection: { _id: 1}
-            };    
-        if(addUserDep(Courses,myData._id,req,options))
-        {
-            myData.save().then(item => {
-            res.send("Course successful");
-            })
-            .catch(err => {
-                res.status(400).send("unable to save to database");
-            });
-        }
-        else
-        {
-            res.send("unknown error");
-        }
-    }
-    catch (error) {
-        res.status(400).send('Error: Admin Login not detected.');
-    }
-});
+//app.post begins here.
 
-app.post('/takes', function (req, res) {
-    var myData = new takes(req.body);
+app.post('/signup', function (req, res) {
+    var myData = new SignUp(req.body);
+    var x;
+    var flag = true;
     myData.save()
     .then(item => {
-    res.send("Signup successful");
+        res.redirect("/");
     })
     .catch(err => {
     res.status(400).send("unable to save to database");
     });
+});
+
+app.post('/login_admin', (req, res) => {
+    Login.find({"email":req.body.email, "password":req.body.password, "admin":true}).then((User) => {
+        if(User != '')
+        {
+            token = createAdminToken({User},config.adminKey);
+            console.log('Token:', token);
+            res.cookie('loginemail',req.body.email);
+            res.cookie('auth',token);
+            res.redirect('/admin');
+        }
+        else
+        {
+            notifier.notify(
+                {
+                  title: 'BDA Labs',
+                  message: 'Invalid Credentials',
+                });
+            res.redirect("/login_admin");
+        }
+    }).catch((error)=>{
+        console.log(error);
+        res.json({
+            error: "Account not found"
+        }).status(400);
+    })
+});
+
+app.post('/login_user', (req, res) => {
+    Login.find({"email":req.body.email, "password":req.body.password}).then((User) => {
+        if(User != '')
+        {
+            token = createUserToken({User},config.userKey);
+            console.log('Token:', token);
+            res.cookie('loginemail',req.body.email);
+            res.cookie('email',req.body.email);
+            res.cookie('auth',token);
+            res.redirect('/userdashboard');
+        }
+        else
+        {
+            notifier.notify(
+                {
+                  title: 'BDA Labs',
+                  message: 'Invalid Credentials',
+                });
+            res.redirect("/login_user");
+        }
+    }).catch((error)=>{
+        console.log(error);
+        res.json({
+            error: "Account not found"
+        }).status(400);
+    })
+});
+app.post('/search_user', (req, res) => {
+    if(req.body.email != '')
+    {
+    Login.find({email:req.body.email}).then((User) => {
+        console.log(User)
+        res.cookie('email',req.body.email);
+        res.redirect('/search_user1');
+     }).catch((error)=>{
+        res.json({
+            error: "Account not found!"
+         }).status(400);
+     })
+    }
+    else
+    {
+        Login.find({email:req.cookies.loginemail}).then((User) => {
+            console.log(User)
+            res.redirect('/search_user1');
+         }).catch((error)=>{
+            res.json({
+                error: "Account not found!"
+             }).status(400);
+         })
+    }
+});
+
+app.post('/publications', function (req, res) {
+    AddOne(publication,UserPublication,res,req,req.body.authors);
+});
+
+app.post('/projects', function (req, res) {
+    AddOne(projects,UserProject,res,req,req.body.authors);
+});
+
+app.post('/courses', function (req, res) {
+    AddOne(courses,UserCourse,res,req,req.body.ta);
 });
 
 app.get('/', function (req, res) {
@@ -418,7 +350,7 @@ app.get('/login_admin', function (req, res) {
     res.sendFile(x + '/login_admin.html');
 });
 
-app.get('/login_user1', function (req, res) {
+app.get('/userdashboard', function (req, res) {
     try {
         var token = req.cookies.auth;
         console.log(token);
@@ -525,6 +457,7 @@ app.get('/courseInput', function (req, res) {
         res.status(400).send('Error: Admin Login not detected.');
       }
 });
+
 app.get('/publications', function (req, res) {
     try {
         var token = req.cookies.auth;
@@ -608,10 +541,11 @@ app.get('/user', (req, res) => {
         console.log(token);
         const decoded = verifyUserToken(token);
         console.log('Decoded:', decoded);
+        loginemail = req.cookies.loginemail;
         if(loginemail !==""){
         res.setHeader('Access-Control-Allow-Origin', '*');
         console.log("email is " + loginemail)
-        SignUp.findOne({email: loginemail}).then(( allUsers) => {
+        Login.findOne({email: loginemail}).then(( allUsers) => {
             console.log(allUsers)
             res.status(200).json(allUsers)
         }).catch((e)=>{
@@ -662,7 +596,7 @@ app.get('/userMail', (req, res) => {
         // console.log('Decoded:', decoded);
         // if(loginemail !==""){
         res.setHeader('Access-Control-Allow-Origin', '*');
-        SignUp.find({email: req.query.email}).then(( user) => {
+        Login.find({email: req.query.email}).then(( user) => {
             console.log(user)
             res.status(200).json(user)
         }).catch((e)=>{
@@ -746,7 +680,8 @@ app.get('/project', (req, res) => {
 });
 app.get('/userPublication', async (req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
-    const linker = await  SignUp.findOne({email: loginemail}).then((user)=>{
+    var searchemail = req.cookies.email;
+    const linker = await  Login.findOne({email: searchemail}).then((user)=>{
         return user 
       })
      
@@ -760,7 +695,8 @@ app.get('/userPublication', async (req, res) => {
 });
 app.get('/userProject', async (req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
-    const linker = await  SignUp.findOne({email: loginemail}).then((user)=>{
+    var searchemail = req.cookies.email;
+    const linker = await  Login.findOne({email: searchemail}).then((user)=>{
         return user 
       })
      
@@ -774,7 +710,8 @@ app.get('/userProject', async (req, res) => {
 });
 app.get('/userCourse', async (req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
-    const linker = await  SignUp.findOne({email: loginemail}).then((user)=>{
+    var searchemail = req.cookies.email;
+    const linker = await  Login.findOne({email: searchemail}).then((user)=>{
         return user 
       })
      
@@ -820,16 +757,19 @@ app.get('/people', (req, res) => {
 // }
 // )
 app.delete('/projects/delete', (req, res) => {
+    var token = req.cookies.auth;
     res.setHeader('Access-Control-Allow-Origin', '*');
     DelOne(projects,res,{name:req.body.name},token,UserProject);
 });
 
 app.delete('/courses/delete', (req, res) => {
+    var token = req.cookies.auth;
     res.setHeader('Access-Control-Allow-Origin', '*');
     DelOne(courses,res,{course_name: req.body.name},token,UserCourse);
 });
 
 app.delete('/publication/delete', (req, res) => {
+    var token = req.cookies.auth;
     res.setHeader('Access-Control-Allow-Origin', '*');
     console.log("id is " + req.body.id)
     DelOne(publication,res,{_id: req.body.id},token,UserPublication);
