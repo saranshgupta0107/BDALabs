@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8" />
+	<title>Admin Dashboard | By Code Info</title>
+	<link rel="stylesheet" href="/public/people.css" />
+	<!-- Font Awesome Cdn Link -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" />
+</head>
+
+<body>
+	<div class="container" style="display:flex;flex-direction:column;">
+        <div class="main-body" id="sabsePehle">
+			
+		</div>
+		<div class="main-body" id="pehle">
+			
+		</div>
+		<div class="main-body" id="name">
+			
+		</div>
+		
+
+
+
+		<script>
+
+		  const sabkeParent = document.getElementById('sabsePehle');
+				const nameParent = document.getElementById('name');
+				const p2 = document.createElement('p');
+				const fname = 
+				fetch('http://localhost:3000/peoplebyname',).then((res)=>res.json()).then(async(data)=>{
+    			console.log(data);
+    			data.forEach(entry => {
+				p2.innerHTML = p2.innerHTML + entry.email + '<p>hi</p>';
+				});
+				
+				nameParent.appendChild(p2);
+    });
+		</script>
+</body>
+</html>

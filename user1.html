@@ -77,22 +77,19 @@
 						return data[0]
 					})
 					var auth = []
-					publication.authors.forEach((element) => {
-						auth.push(" " + element)
-					})
+					await publication.authors.forEach(async (email)=>{
+					fetch('http://localhost:3000/peoplebyemail?email=' + email,).then((res)=>res.json()).then((data)=>{
+					console.log(data)
+					data.forEach(entry => {
+					p2.innerHTML = p2.innerHTML + '<p>'+ entry.fname + ' ' + entry.lname + ',</p>';
+					});
+			})
 					p2.innerHTML = p2.innerHTML + `<div class="card_Paper">
 			<div class="card1">
 			<label for="Publication ">Publication Name:</label>
 			<p>${publication.name}</p>
 			<label for="Supervisor">Supervisor:</label>`
 
-			await publication.authors.forEach(async email=>{
-				fetch('http://localhost:3000/peoplebyemail?email=' + email,).then((res)=>res.json()).then((data)=>{
-    			console.log(data)
-    			data.forEach(entry => {
-				p2.innerHTML = p2.innerHTML + '<p>'+ entry.fname + ' ' + entry.lname + ',</p>';
-				});
-			})
 		});
 		
 			

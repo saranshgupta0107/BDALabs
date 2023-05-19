@@ -334,10 +334,9 @@ app.post('/search_user', async (req, res) => {
     {
         if(req.body.query.includes('@'))
         {
-                console.log('hi');
-                Login.find({email:req.body.email}).then((User) => {
+                SignUp.find({email:req.body.query}).then((User) => {
                     console.log(User)
-                    res.cookie('email',req.body.email);
+                    res.cookie('email',req.body.query);
                     res.redirect('/search_user1');
                 }).catch((error)=>{
                 res.json({
@@ -357,9 +356,19 @@ app.post('/search_user', async (req, res) => {
             else
             {
                 var ln = req.body.query[1];
-                await Login.find({fname:fn,lname:ln}).then((User) => {
-                    console.log(User);
-                });
+                SignUp.find({fname:fn,lname:ln}).then((User) => {
+                if(User[0] != '')
+                {
+                    res.cookie("email",User[0].email);
+                    console.log(User[0].email);
+                    res.redirect('/search_user1');
+                }
+                }).catch((error)=>{
+                    console.log(error);
+                res.json({
+                    error: "Person not found!"
+                }).status(400);
+                })
             }
         }
     }
@@ -394,8 +403,8 @@ app.post('/projects', function (req, res) {
 });
 
 app.post('/courses', function (req, res) {
-    var x = req.body.authors.toString();
-    req.body.authors = x.split(',');
+    var x = req.body.ta.toString();
+    req.body.ta = x.split(',');
     AddOne(courses,UserCourse,res,req,req.body.ta);
 });
 
@@ -445,7 +454,7 @@ app.get('/search_people_fname', function (req, res) {
 app.get('/search_people_name', function (req, res) {
     try {
         let x = path.join(__dirname,'../');
-        res.sendFile(x + '/search1.html');
+        res.sendFile(x + '/peoplename.html');
       }
       catch (error) {
         res.status(400).send('Error: Unknown');
@@ -815,13 +824,13 @@ app.get('/people', (req, res) => {
 
 app.get('/peoplebyemail', async (req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
-    var arr = []
-    await SignUp.find({email:req.query.email}).then(( allPeoples) => {
-        allPeoples.forEach((Element)=>{
-                arr.push(Element)
-        })
-        res.status(200).json(arr)
-
+    await SignUp.find({email:req.cookies.email}).then(( allPeoples) => {
+        console.log(allPeoples[0]);
+        if(allPeoples != '')
+        {
+            res.cookie("email",allPeoples[0].email);
+            res.redirect('/search_user1');
+        }
     }).catch((e)=>{
         console.log(e)
         res.status(400).send(e)
@@ -833,21 +842,6 @@ app.get('/peoplebyfname', async (req, res) => {
     console.log(req.cookies.fname);
     var arr = []
     await SignUp.find({fname: req.cookies.fname}).then(( allPeoples) => {
-        allPeoples.forEach((Element)=>{
-                arr.push(Element)
-        })
-        res.status(200).json(arr)
-
-    }).catch((e)=>{
-        console.log(e)
-        res.status(400).send(e)
-    })
-});
-
-app.get('/peoplebyname', async (req, res) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    var arr = []
-    await SignUp.find({fname:req.query.fname,lname:req.query.lname}).then(( allPeoples) => {
         allPeoples.forEach((Element)=>{
                 arr.push(Element)
         })
