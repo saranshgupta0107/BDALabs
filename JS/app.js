@@ -839,12 +839,13 @@ app.get('/peoplebyemail', async (req, res) => {
 
 app.get('/peoplebyfname', async (req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
-    console.log(req.cookies.fname);
+    console.log("fname is"  + req.cookies.fname);
     var arr = []
     await SignUp.find({fname: req.cookies.fname}).then(( allPeoples) => {
         allPeoples.forEach((Element)=>{
                 arr.push(Element)
         })
+        console.log("arr is "  + arr)
         res.status(200).json(arr)
 
     }).catch((e)=>{

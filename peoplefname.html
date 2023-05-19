@@ -4,7 +4,7 @@
 <head>
 	<meta charset="UTF-8" />
 	<title>Admin Dashboard | By Code Info</title>
-	<link rel="stylesheet" href="/public/people.css" />
+	<link rel="stylesheet" href="/public/user1.css" />
 	<!-- Font Awesome Cdn Link -->
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" />
 </head>
@@ -16,6 +16,7 @@
 		</div>
 		<div class="main-body" id="pehle">
 			
+			</div>
 		</div>
 		<div class="main-body" id="name">
 			
@@ -25,19 +26,34 @@
 
 
 		<script>
-
+			    
 		  const sabkeParent = document.getElementById('sabsePehle');
-				const nameParent = document.getElementById('name');
-				const p2 = document.createElement('p');
-				const fname = 
+				const nameParent = document.getElementById('pehle');
+				// const fname = 
 				fetch('http://localhost:3000/peoplebyfname',).then((res)=>res.json()).then(async(data)=>{
     			console.log(data);
-    			data.forEach(entry => {
-				p2.innerHTML = p2.innerHTML + '<p>hi</p>';
-				p2.innerHTML = p2.innerHTML + '<a href=\'/search_user\' onClick=\"SetCookie(\'email\',\''+entry.email+'\')">';
+    			data.forEach(element => {
+				const iterate = document.createElement('p')
+          
+		         iterate.innerHTML = `
+				 <div class="card_Paper" id="ewew">
+				<div class="card1">
+				<label for="Publication ">First Name:</label>
+				<p>${element.fname}</p>
+				<label for="Supervisor">Last Name:</label>
+				<p>${element.lname}</p>
+				<label for="Publication Date: ">Email: </label>
+				<p>${element.email}</p>
+			</div>  
+				 `
+				 iterate.addEventListener("click", function() {
+					// here set the cookie to the location we want to display in the cookie page 
+					window.location.href = "http://localhost:3000/search_user1"
+				 });
+				 nameParent.appendChild(iterate)
+
 				});
 				
-				nameParent.appendChild(p2);
     });
 		</script>
 </body>
