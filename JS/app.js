@@ -47,7 +47,7 @@ var userPublicationSchema = new mongoose.Schema({
 var projectsSchema = new mongoose.Schema({
     name: String,
     description: String,
-    authors: Array,
+    member: Array,
     instructor: String
 });
 
@@ -317,19 +317,39 @@ app.post('/login_user', (req, res) => {
     })
 });
 
-app.post('/search_user', async(req, res) => {
-    if(req.body.email != '')
+app.post('/search_user', async (req, res) => {
+    if(req.body.query != '')
     {
-        console.log('hi');
-    await SignUp.find({email:req.body.email}).then((User) => {
-        console.log(User)
-        res.cookie('email',req.body.email);
-        res.redirect('/search_user1');
-     }).catch((error)=>{
-        res.json({
-            error: "Account not found!"
-         }).status(400);
-     })
+        if(req.body.query.includes('@'))
+        {
+                console.log('hi');
+                Login.find({email:req.body.email}).then((User) => {
+                    console.log(User)
+                    res.cookie('email',req.body.email);
+                    res.redirect('/search_user1');
+                }).catch((error)=>{
+                res.json({
+                    error: "Account not found!"
+                }).status(400);
+            })
+        }
+        else
+        {
+            req.body.query = req.body.query.split(' ');
+            var fn = req.body.query[0];
+            if(req.body.query.length == 1)
+            {
+                res.cookie("fname",fn);
+                res.redirect("/search_people_fname");
+            }
+            else
+            {
+                var ln = req.body.query[1];
+                await Login.find({fname:fn,lname:ln}).then((User) => {
+                    console.log(User);
+                });
+            }
+        }
     }
     else if(req.cookies.loginemail != '')
     {
@@ -350,16 +370,20 @@ app.post('/search_user', async(req, res) => {
 });
 
 app.post('/publications', function (req, res) {
+    var x = req.body.authors.toString();
+    req.body.authors = x.split(',');
     AddOne(publication,UserPublication,res,req,req.body.authors);
 });
 
 app.post('/projects', function (req, res) {
     var x = req.body.authors.toString();
     req.body.authors = x.split(',');
-    AddOne(projects,UserProject,res,req,req.body.authors);
+    AddOne(projects,UserProject,res,req,req.body.members);
 });
 
 app.post('/courses', function (req, res) {
+    var x = req.body.authors.toString();
+    req.body.authors = x.split(',');
     AddOne(courses,UserCourse,res,req,req.body.ta);
 });
 
@@ -393,6 +417,26 @@ app.get('/userdashboard', function (req, res) {
       }
       catch (error) {
         res.status(400).send('Error: User Login not detected.');
+      }
+});
+
+app.get('/search_people_fname', function (req, res) {
+    try {
+        let x = path.join(__dirname,'../');
+        res.sendFile(x + '/peoplefname.html');
+      }
+      catch (error) {
+        res.status(400).send('Error: Unknown');
+      }
+});
+
+app.get('/search_people_name', function (req, res) {
+    try {
+        let x = path.join(__dirname,'../');
+        res.sendFile(x + '/search1.html');
+      }
+      catch (error) {
+        res.status(400).send('Error: Unknown');
       }
 });
 
@@ -593,7 +637,6 @@ app.get('/user', (req, res) => {
 app.get('/searchUser', (req, res) => {
     try {
         var searchemail = req.cookies.email;
-        print("Search Email : " + searchemail)
         if(searchemail !==""){
         res.setHeader('Access-Control-Allow-Origin', '*');
         console.log("email is " + searchemail)
@@ -749,6 +792,52 @@ app.get('/people', (req, res) => {
             if(Element.roll === "PHD" || Element.roll === "M. Tech."){
                 arr.push(Element)
             }
+        })
+        res.status(200).json(arr)
+
+    }).catch((e)=>{
+        console.log(e)
+        res.status(400).send(e)
+    })
+});
+
+app.get('/peoplebyemail', async (req, res) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    var arr = []
+    await SignUp.find({email:req.query.email}).then(( allPeoples) => {
+        allPeoples.forEach((Element)=>{
+                arr.push(Element)
+        })
+        res.status(200).json(arr)
+
+    }).catch((e)=>{
+        console.log(e)
+        res.status(400).send(e)
+    })
+});
+
+app.get('/peoplebyfname', async (req, res) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    console.log(req.cookies.fname);
+    var arr = []
+    await SignUp.find({fname: req.cookies.fname}).then(( allPeoples) => {
+        allPeoples.forEach((Element)=>{
+                arr.push(Element)
+        })
+        res.status(200).json(arr)
+
+    }).catch((e)=>{
+        console.log(e)
+        res.status(400).send(e)
+    })
+});
+
+app.get('/peoplebyname', async (req, res) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    var arr = []
+    await SignUp.find({fname:req.query.fname,lname:req.query.lname}).then(( allPeoples) => {
+        allPeoples.forEach((Element)=>{
+                arr.push(Element)
         })
         res.status(200).json(arr)
 
