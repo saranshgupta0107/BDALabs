@@ -45,10 +45,13 @@ var userPublicationSchema = new mongoose.Schema({
 });
 
 var projectsSchema = new mongoose.Schema({
-    name: String,
+    title: String,
+    objective : String,
     description: String,
-    member: Array,
-    instructor: String
+    members: Array,
+    instructor: String,
+    date : Date,
+    references: String
 });
 
 var coursesSchema = new mongoose.Schema({
@@ -56,18 +59,16 @@ var coursesSchema = new mongoose.Schema({
     instructor: String,
     ta: Array,
     number_of_students: String,
-    no_of_it_student: String,
-    mba_student: String,
    });
 
 var publicationSchema = new mongoose.Schema({
-    name:String,
-    supervisor:String,
-    abstract:String,
-    authors:Array,
-    pub_date:Date,
-    publisher:String,
-    location:String
+    name: String,
+    supervisor: String,
+    abstract: String,
+    authors: Array,
+    pub_date: Date,
+    publisher: String,
+    location: String
 })
 
 module.exports={     
@@ -104,7 +105,6 @@ var UserPublication = mongoose.model("User_Publication_Relation", userPublicatio
 var courses = mongoose.model("Courses", coursesSchema,"Courses");
 var projects = mongoose.model("Projects", projectsSchema,"Projects");
 var publication = mongoose.model("Publications", publicationSchema,"Publications");
-
 
 var app = express();
 const port = 3000;
@@ -240,6 +240,18 @@ app.post('/signup', async function (req, res) {
     var myData = new SignUp(req.body);
     var salt = await bcrypt.genSalt();
     myData.password = await bcrypt.hash(req.body.password, salt);
+    if(myData.email.startsWith("IIT") || myData.email.startsWith("IEC"))
+    {
+        myData.roll = "B. Tech."
+    }
+    else if(myData.email.startsWith("RSI"))
+    {
+        myData.roll = "PHD"
+    }
+    else if(myData.email.startsWith("MEC") || myData.email.startsWith("MIT") || myData.email.startsWith("MDE") || myData.email.startsWith("MBI"))
+    {
+        myData.roll = "M. Tech."
+    }
     myData.save()
     .then(item => {
         res.redirect("/");
@@ -376,8 +388,8 @@ app.post('/publications', function (req, res) {
 });
 
 app.post('/projects', function (req, res) {
-    var x = req.body.authors.toString();
-    req.body.authors = x.split(',');
+    var x = req.body.members.toString();
+    req.body.members = x.split(',');
     AddOne(projects,UserProject,res,req,req.body.members);
 });
 
@@ -568,7 +580,7 @@ app.get('/projectInput', function (req, res) {
         const decoded = verifyAdminToken(token);
         console.log('Decoded:', decoded);
         let x = path.join(__dirname,'../');
-        res.sendFile(x + '/projects.html');
+        res.sendFile(x + '/project.html');
       } 
       catch (error) {
         res.status(400).send('Error: Admin Login not detected.');
@@ -865,7 +877,7 @@ app.get('/admins', (req, res) => {
 app.delete('/projects/delete', (req, res) => {
     var token = req.cookies.auth;
     res.setHeader('Access-Control-Allow-Origin', '*');
-    DelOne(projects,res,{name:req.body.name},token,UserProject);
+    DelOne(projects,res,{name:req.body.title},token,UserProject);
 });
 
 app.delete('/courses/delete', (req, res) => {

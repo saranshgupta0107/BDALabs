@@ -176,31 +176,42 @@ parent.appendChild(ul);
     console.log("Error Occured!")
   })
 
-  fetch('http://localhost:3000/publications',).then((res)=>res.json()).then((data)=>{
+  fetch('http://localhost:3000/publications',).then((res)=>res.json()).then(async (data)=>{
     console.log(data)
-    data.forEach(element => {
-      console.log(element)
+    data.forEach(async(element) => {
       const parent = document.getElementById('Publication');
 const ul = document.createElement('ul');
 const li = document.createElement('li');
 const h3 = document.createElement('h3');
 h3.textContent = element.name;
 const p1 = document.createElement('p');
-p1.textContent = "supervisor: " + element.supervisor;
+p1.textContent = "name: " + element.name;
 const p2 = document.createElement('p');
-p2.textContent = 'Abstract : ' + element.abstract;
+p2.textContent = "supervisor: " + element.supervisor;
 const p3 = document.createElement('p');
-p3.textContent = 'Publication Date:  ' + element.pub_date;
+p3.textContent = 'Abstract : ' + element.abstract;
 const p4 = document.createElement('p');
-p4.textContent = 'Publisher:  ' + element.publisher;
+p4.innerHTML = 'Authors : '
+await element.authors.forEach(email=>{
+				fetch('http://localhost:3000/peoplebyemail?email=' + email,).then((res)=>res.json()).then((data)=>{
+    			data.forEach(entry => {
+				p4.innerHTML = p4.innerHTML + entry.fname + ' ' + entry.lname + ', ';
+				});
+			})});
 const p5 = document.createElement('p');
-p4.textContent = 'Location:  ' + element.location;
+p5.textContent = 'Publication Date:  ' + element.pub_date;
+const p6 = document.createElement('p');
+p6.textContent = 'Publisher:  ' + element.publisher;
+const p7 = document.createElement('p');
+p7.textContent = 'Location:  ' + element.location;
 li.appendChild(h3);
 li.appendChild(p1);
 li.appendChild(p2);
 li.appendChild(p3);
 li.appendChild(p4);
 li.appendChild(p5);
+li.appendChild(p6);
+li.appendChild(p7);
 ul.appendChild(li);
 h3.innerHTML += '</h3>'; 
 p1.innerHTML= '<div style="font-weight:700; font-size:20px">' + p1.innerHTML + '</div>'
@@ -245,22 +256,42 @@ parent.appendChild(ul);
 
   fetch('http://localhost:3000/projects',).then((res)=>res.json()).then((data)=>{
     console.log(data)
-    data.forEach(element => {
+    data.forEach(async(element) => {
       const parent = document.getElementById('Projects');
 const ul = document.createElement('ul');
 const li = document.createElement('li');
 const h3 = document.createElement('h3');
 h3.textContent = element.course_name;
 const p1 = document.createElement('p');
-p1.textContent = "Project Name: " + element.name;
+p1.textContent = "Project Title : " + element.title;
 const p2 = document.createElement('p');
-p2.textContent = 'Description : ' + element.description;
+p2.textContent = 'Objective : ' + element.objective;
+const p3 = document.createElement('p');
+p3.textContent = 'Description : ' + element.description;
+const p4 = document.createElement('p');
+p4.innerHTML = 'Team members : '
+await element.members.forEach(email=>{
+				fetch('http://localhost:3000/peoplebyemail?email=' + email,).then((res)=>res.json()).then((data)=>{
+    			data.forEach(entry => {
+				p4.innerHTML = p4.innerHTML + entry.fname + ' ' + entry.lname + ', ';
+				});
+			})});
+const p5 = document.createElement('p');
+p5.textContent = 'Instructor : ' + element.instructor;
+const p6 = document.createElement('p');
+p6.textContent = 'Date : ' + element.date;
+const p7 = document.createElement('p');
+p7.textContent = 'References : ' + element.references;
 // const p3 = document.createElement('p');
 // p3.textContent = 'Number of Students:  ' + element.number_of_students;
 li.appendChild(h3);
 li.appendChild(p1);
 li.appendChild(p2);
-// li.appendChild(p3);
+li.appendChild(p3);
+li.appendChild(p4);
+li.appendChild(p5);
+li.appendChild(p6);
+li.appendChild(p7);
 ul.appendChild(li);
 p2.innerHTML= '<div style="font-weight:500; font-size:18px">' + p2.innerHTML + '</div>'
 p1.innerHTML = '<h3>' + p1.innerHTML + '</h3>'

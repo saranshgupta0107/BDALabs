@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Project Form</title>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css" integrity="sha384-5sAR7xN1Nv6T6+dT2mhtzEpVJvfS3NScPQTrOxhwjIuvcA67KV2R5Jz6kr4abQsz" crossorigin="anonymous">
+    <link rel="stylesheet" href="public/project.css">
+  </head>
+  <body class="container">
+    <div class="ram">
+    <div class="main-block">
+      <h1>Project Details</h1>
+      <form method="POST" action="/projects">
+        
+        <label for="course_id">Project Title : </label>
+        <input type="text" name="title" id="title" placeholder="Project Name" required/>
+
+        <label for="course_id">Objective : </label>
+        <input type="text" name="objective" id="objective" placeholder="Objective" required/>
+        
+        <label for="course_id">Description : </label>
+        <input type="text" name="description" id="description" placeholder="Description" required/>
+
+        <label for="course_id">Team Members : </label>
+        <input type="email" name="members" id="members" placeholder="Team member emails separated by commas." required multiple/>
+
+        <label for="course_id">References : </label>
+        <input type="text" name="references" id="references" placeholder="References"/>
+        
+        <label for="course_id">Date : </label>
+        <input type="date" name="date" id="date" required/>
+
+        <label for="course_id">Instructor : </label>
+        <input type="text" name="instructor" id="instructor" placeholder="Instructor" required/>
+        
+        <div class="btn-block">
+          
+          <button type="submit" href="/">Submit</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  </body>
+</html>
